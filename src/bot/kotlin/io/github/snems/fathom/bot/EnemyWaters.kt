@@ -31,11 +31,11 @@ internal class EnemyWaters {
     /** Takes in the result of a shot. A result for a cell off the board is ignored. */
     fun record(shot: Shot) {
         if (shot.position !in Board) return
-        val sunk = shot.sunkShip?.takeIf { shot.result == ShotResult.SUNK && it.isOnBoard() }
+        val sunkShip = shot.sunkShip?.takeIf { shot.result == ShotResult.SUNK && it.isOnBoard() }
         when {
             shot.result == ShotResult.MISS -> closed[shot.position.index()] = true
 
-            sunk != null -> sink(sunk)
+            sunkShip != null -> sink(sunkShip)
 
             // A hit, or a sinking that does not say which ship sank.
             else -> openHit[shot.position.index()] = true
@@ -44,6 +44,8 @@ internal class EnemyWaters {
 
     private fun sink(ship: ShipPlacement) {
         val candidate = Candidate.of(ship)
+        // A sinking reported a second time changes nothing.
+        if (candidate in sunk) return
         candidate.cells.forEach {
             closed[it] = true
             openHit[it] = false

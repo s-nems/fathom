@@ -4,7 +4,7 @@ import io.github.snems.fathom.SampleFleets.COMPLETE
 import io.github.snems.fathom.board.Board
 import io.github.snems.fathom.board.FLEET_SHIP_SIZES
 import io.github.snems.fathom.board.cells
-import io.kotest.matchers.collections.shouldHaveSize
+import io.github.snems.fathom.board.edgeNeighbours
 import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.shouldBe
 import jd.mg.ships.tournament.api.Position
@@ -16,6 +16,7 @@ import jd.mg.ships.tournament.api.ShotResult.SUNK
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import java.util.BitSet
 import kotlin.random.Random
 import kotlin.time.AbstractLongTimeSource
 import kotlin.time.Duration
@@ -32,88 +33,88 @@ class FleetSamplerTest {
 
     @ParameterizedTest(name = "belief in sequential placing {0}")
     @ValueSource(doubles = [0.0, 0.5, 1.0])
-    fun shouldMatchEveryFleetWhenNoHitIsOpen(sequentialPlacing: Double) {
+    fun shouldMatchEveryFleetWhenNoHitIsOpen(sequentialChance: Double) {
         // given
         sink(COMPLETE.dropLast(2))
 
         // when
-        val sampled = shares(sample(sequentialPlacing))
+        val sampled = shares(sample(sequentialChance))
 
         // then
-        sampled shouldMatch shares(sumOverEveryFleet(sequentialPlacing))
+        sampled shouldMatch shares(sumOverEveryFleet(sequentialChance))
     }
 
     @ParameterizedTest(name = "belief in sequential placing {0}")
     @ValueSource(doubles = [0.0, 0.5, 1.0])
-    fun shouldMatchEveryFleetWhenOneShipIsHit(sequentialPlacing: Double) {
+    fun shouldMatchEveryFleetWhenOneShipIsHit(sequentialChance: Double) {
         // given
         val afloat = listOf(COMPLETE[5], COMPLETE[8], COMPLETE[9])
         sink(COMPLETE - afloat.toSet())
-        waters.record(Shot(afloat.first().cells()[1], HIT))
+        hit(afloat.first().cells()[1])
 
         // when
-        val sampled = shares(sample(sequentialPlacing))
+        val sampled = shares(sample(sequentialChance))
 
         // then
-        sampled shouldMatch shares(sumOverEveryFleet(sequentialPlacing))
+        sampled shouldMatch shares(sumOverEveryFleet(sequentialChance))
     }
 
     @ParameterizedTest(name = "belief in sequential placing {0}")
     @ValueSource(doubles = [0.0, 0.5, 1.0])
-    fun shouldMatchEveryFleetWhenShipsOfDifferentSizesAreHit(sequentialPlacing: Double) {
+    fun shouldMatchEveryFleetWhenShipsOfDifferentSizesAreHit(sequentialChance: Double) {
         // given
         val afloat = listOf(COMPLETE[2], COMPLETE[5], COMPLETE[9])
         sink(COMPLETE - afloat.toSet())
-        waters.record(Shot(afloat[0].cells()[0], HIT))
-        waters.record(Shot(afloat[1].cells()[2], HIT))
-        waters.record(Shot(Position(9, 9), MISS))
+        hit(afloat[0].cells()[0])
+        hit(afloat[1].cells()[2])
+        miss(Position(9, 9))
 
         // when
-        val sampled = shares(sample(sequentialPlacing))
+        val sampled = shares(sample(sequentialChance))
 
         // then
-        sampled shouldMatch shares(sumOverEveryFleet(sequentialPlacing))
+        sampled shouldMatch shares(sumOverEveryFleet(sequentialChance))
     }
 
     @ParameterizedTest(name = "belief in sequential placing {0}")
     @ValueSource(doubles = [0.0, 0.5, 1.0])
-    fun shouldMatchEveryFleetWhenShipsOfEqualSizeAreHitWithAGapBetweenHits(sequentialPlacing: Double) {
+    fun shouldMatchEveryFleetWhenShipsOfEqualSizeAreHitWithAGapBetweenHits(sequentialChance: Double) {
         // given
         val afloat = listOf(COMPLETE[3], COMPLETE[4], COMPLETE[5], COMPLETE[9])
         sink(COMPLETE - afloat.toSet())
-        waters.record(Shot(afloat[0].cells()[1], HIT))
-        waters.record(Shot(afloat[2].cells()[0], HIT))
-        waters.record(Shot(afloat[2].cells()[2], HIT))
-        (0 until Board.SIZE).forEach { x -> waters.record(Shot(Position(x, 8), MISS)) }
-        (0..4).forEach { x -> waters.record(Shot(Position(x, 5), MISS)) }
+        hit(afloat[0].cells()[1])
+        hit(afloat[2].cells()[0])
+        hit(afloat[2].cells()[2])
+        (0 until Board.SIZE).forEach { x -> miss(Position(x, 8)) }
+        (0..4).forEach { x -> miss(Position(x, 5)) }
 
         // when
-        val sampled = shares(sample(sequentialPlacing))
+        val sampled = shares(sample(sequentialChance))
 
         // then
-        sampled shouldMatch shares(sumOverEveryFleet(sequentialPlacing))
+        sampled shouldMatch shares(sumOverEveryFleet(sequentialChance))
     }
 
     @ParameterizedTest(name = "belief in sequential placing {0}")
     @ValueSource(doubles = [0.0, 0.5, 1.0])
-    fun shouldMatchEveryFleetWhenTwoHitsCouldBeAWholeShip(sequentialPlacing: Double) {
+    fun shouldMatchEveryFleetWhenTwoHitsCouldBeAWholeShip(sequentialChance: Double) {
         // given
         val afloat = listOf(COMPLETE[5], COMPLETE[8], COMPLETE[9])
         sink(COMPLETE - afloat.toSet())
-        waters.record(Shot(afloat.first().cells()[0], HIT))
-        waters.record(Shot(afloat.first().cells()[1], HIT))
+        hit(afloat.first().cells()[0])
+        hit(afloat.first().cells()[1])
 
         // when
-        val sampled = shares(sample(sequentialPlacing))
+        val sampled = shares(sample(sequentialChance))
 
         // then
-        sampled shouldMatch shares(sumOverEveryFleet(sequentialPlacing))
+        sampled shouldMatch shares(sumOverEveryFleet(sequentialChance))
     }
 
     @Test
     fun shouldEstimateTheNumberOfLegalFleets() {
         // when
-        val weights = sample(sequentialPlacing = 0.0, samples = MANY_SAMPLES)
+        val weights = sample(sequentialChance = 0.0, samples = MANY_SAMPLES)
 
         // then
         val meanWeightOfAFleet = weights.sum() / FLEET_SHIP_SIZES.sum() / MANY_SAMPLES
@@ -124,10 +125,10 @@ class FleetSamplerTest {
     fun shouldSayNothingWhenNoFleetAgreesWithTheShots() {
         // given
         sink(COMPLETE.dropLast(1))
-        Board.positions.forEach { waters.record(Shot(it, MISS)) }
+        Board.positions.forEach(::miss)
 
         // when
-        val weights = sample(sequentialPlacing = 1.0)
+        val weights = sample(sequentialChance = 1.0)
 
         // then
         weights.all { it == 0.0 } shouldBe true
@@ -136,17 +137,21 @@ class FleetSamplerTest {
     @Test
     fun shouldStopDrawingWhenItsTimeIsUp() {
         // given
-        val unlimitedSamples = SamplerSettings(samples = Int.MAX_VALUE, timeBudget = TICKS_IN_BUDGET.milliseconds)
+        val unlimitedSamples = SamplerSettings(samples = Int.MAX_VALUE)
+        val budget = TimeBudget(TICKS_IN_BUDGET.milliseconds, TickingTimeSource())
 
         // when
-        val stoppedByTime = FleetSampler(waters, Random(SEED), unlimitedSamples, TickingTimeSource()).weights()
+        val stoppedByTime = FleetSampler(waters, Random(SEED), unlimitedSamples, budget).weights()
 
         // then
-        val fleetsDrawn =
-            (1..TICKS_IN_BUDGET).filter { samples ->
-                sample(SamplerSettings().sequentialPlacing, samples).contentEquals(stoppedByTime)
+        val drawn =
+            (1..TICKS_IN_BUDGET).filter {
+                sample(
+                    SamplerSettings().sequentialChance,
+                    it,
+                ).contentEquals(stoppedByTime)
             }
-        fleetsDrawn shouldHaveSize 1
+        drawn shouldBe listOf(FLEETS_DRAWN_IN_BUDGET)
     }
 
     /** A clock that moves on by a millisecond each time it is read. */
@@ -157,70 +162,90 @@ class FleetSamplerTest {
     }
 
     private fun sample(
-        sequentialPlacing: Double,
+        sequentialChance: Double,
         samples: Int = SAMPLES,
     ): DoubleArray {
-        val settings = SamplerSettings(samples, Duration.INFINITE, sequentialPlacing)
-        return FleetSampler(waters, Random(SEED), settings, TimeSource.Monotonic).weights()
+        val unlimited = TimeBudget(Duration.INFINITE, TimeSource.Monotonic)
+        return FleetSampler(waters, Random(SEED), SamplerSettings(samples, sequentialChance), unlimited).weights()
     }
 
-    /** Tells the bot it has sunk these ships, cell by cell, as a referee would. */
+    // What the test knows about the position, kept apart from what it tells the sampler, so that the exact sum
+    // below shares nothing with the code under test but the rules of the board.
+    private val misses = BitSet(CELL_COUNT)
+    private val hits = BitSet(CELL_COUNT)
+    private val sunk = mutableListOf<ShipPlacement>()
+
+    private fun hit(position: Position) {
+        hits.set(position.index())
+        waters.record(Shot(position, HIT))
+    }
+
+    private fun miss(position: Position) {
+        misses.set(position.index())
+        waters.record(Shot(position, MISS))
+    }
+
+    /** Sinks the ships cell by cell, as a referee would report it. */
     private fun sink(ships: List<ShipPlacement>) {
         ships.forEach { ship ->
             ship.cells().dropLast(1).forEach { waters.record(Shot(it, HIT)) }
             waters.record(Shot(ship.cells().last(), SUNK, ship))
         }
+        sunk += ships
     }
 
     /**
      * For every cell that is not hit, the summed likelihood of the fleets that agree with the shots and have a
      * ship on it.
      */
-    private fun sumOverEveryFleet(sequentialPlacing: Double): DoubleArray {
+    private fun sumOverEveryFleet(sequentialChance: Double): DoubleArray {
         val sums = DoubleArray(CELL_COUNT)
-        val hits = waters.openHits().toSet()
+
+        fun count(fleet: List<ShipPlacement>) {
+            val covered = BitSet(CELL_COUNT).also { all -> fleet.forEach { all.or(cellsOf(it)) } }
+            val everyHitIsCovered = hits.without(covered).isEmpty
+            val everyShipIsAfloat = fleet.none { cellsOf(it).without(hits).isEmpty }
+            if (!everyHitIsCovered || !everyShipIsAfloat) return
+            val likelihood = likelihood(sunk + fleet, sequentialChance)
+            covered.without(hits).stream().forEach { sums[it] += likelihood }
+        }
 
         fun extend(
-            fleet: List<Candidate>,
+            fleet: List<ShipPlacement>,
             sizes: List<Int>,
         ) {
-            if (sizes.isEmpty()) {
-                val covered = fleet.flatMap { it.cells.asList() }.toSet()
-                val everyShipAfloat = fleet.none { ship -> ship.cells.all { it in hits } }
-                if (covered.containsAll(hits) && everyShipAfloat) {
-                    val likelihood = likelihood(waters.sunk + fleet, sequentialPlacing)
-                    (covered - hits).forEach { sums[it] += likelihood }
-                }
-                return
-            }
+            if (sizes.isEmpty()) return count(fleet)
             val size = sizes.first()
-            val candidates = Candidate.BY_SIZE.getValue(size)
+            val placements = Board.placementsOf(size)
+            val taken = claimOf(sunk + fleet).also { it.or(misses) }
             // Ships of equal size are taken in one order only, so that each fleet is listed once.
-            val start = fleet.lastOrNull()?.takeIf { it.cells.size == size }?.let { candidates.indexOf(it) + 1 } ?: 0
-            for (candidate in candidates.drop(start)) {
-                if (waters.allows(candidate) &&
-                    fleet.all(candidate::keepsClearOf)
-                ) {
-                    extend(fleet + candidate, sizes.drop(1))
-                }
-            }
+            val start = fleet.lastOrNull()?.takeIf { it.size == size }?.let { placements.indexOf(it) + 1 } ?: 0
+            placements
+                .drop(
+                    start,
+                ).filter { !cellsOf(it).intersects(taken) }
+                .forEach { extend(fleet + it, sizes.drop(1)) }
         }
-        extend(emptyList(), waters.afloat)
+        extend(emptyList(), sunk.fold(FLEET_SHIP_SIZES) { sizes, ship -> sizes - ship.size })
         return sums
     }
 
     /** Likelihood of a whole fleet under the belief, compared with picking any legal fleet with equal chance. */
     private fun likelihood(
-        fleet: List<Candidate>,
-        sequentialPlacing: Double,
-    ): Double = sequentialPlacing * PlacingBelief.LEGAL_FLEETS * sequentialChance(fleet) + (1.0 - sequentialPlacing)
+        fleet: List<ShipPlacement>,
+        sequentialChance: Double,
+    ): Double {
+        if (sequentialChance == 0.0) return 1.0
+        val inSequence = PlacingBelief.LEGAL_FLEETS * chanceOfPlacingInSequence(fleet)
+        return sequentialChance * inSequence + (1.0 - sequentialChance)
+    }
 
     /** The chance that placing ship after ship at random, largest first, gives this fleet, over every order. */
-    private fun sequentialChance(fleet: List<Candidate>): Double {
-        val placed = mutableListOf<Candidate>()
+    private fun chanceOfPlacingInSequence(fleet: List<ShipPlacement>): Double {
+        val placed = mutableListOf<ShipPlacement>()
         var chance = 1.0
         for (size in FLEET_SHIP_SIZES.distinct()) {
-            val ships = fleet.filter { it.cells.size == size }
+            val ships = fleet.filter { it.size == size }
             chance *= chanceOfEveryOrder(ships, placed)
             placed += ships
         }
@@ -228,13 +253,26 @@ class FleetSamplerTest {
     }
 
     private fun chanceOfEveryOrder(
-        toPlace: List<Candidate>,
-        placed: List<Candidate>,
+        toPlace: List<ShipPlacement>,
+        placed: List<ShipPlacement>,
     ): Double {
         if (toPlace.isEmpty()) return 1.0
-        val free = Candidate.BY_SIZE.getValue(toPlace.first().cells.size).count { placed.all(it::keepsClearOf) }
+        val taken = claimOf(placed)
+        val free = Board.placementsOf(toPlace.first().size).count { !cellsOf(it).intersects(taken) }
         return toPlace.sumOf { next -> chanceOfEveryOrder(toPlace - next, placed + next) } / free
     }
+
+    private val cellBits = HashMap<ShipPlacement, BitSet>()
+
+    private fun cellsOf(ship: ShipPlacement): BitSet = cellBits.getOrPut(ship) { bits(ship.cells()) }
+
+    /** The cells of the ships and the cells sharing an edge with them, where no other ship may lie. */
+    private fun claimOf(ships: List<ShipPlacement>): BitSet = bits(ships.flatMap { it.cells() + it.edgeNeighbours() })
+
+    private fun bits(positions: Collection<Position>): BitSet =
+        BitSet(CELL_COUNT).also { set -> positions.forEach { set.set(it.index()) } }
+
+    private fun BitSet.without(other: BitSet): BitSet = (clone() as BitSet).also { it.andNot(other) }
 
     private fun shares(weights: DoubleArray): List<Double> = weights.map { it / weights.sum() }
 
@@ -253,5 +291,8 @@ class FleetSamplerTest {
         const val SAMPLING_ERROR = 0.0015
         const val ESTIMATE_ERROR = 0.02
         const val TICKS_IN_BUDGET = 20
+
+        /** The clock is read once to start the time, once to find its zero, and once before each fleet. */
+        const val FLEETS_DRAWN_IN_BUDGET = 18
     }
 }

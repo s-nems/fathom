@@ -7,6 +7,8 @@ import jd.mg.ships.tournament.api.Position
 import jd.mg.ships.tournament.api.ShipPlacement
 import jd.mg.ships.tournament.api.Shot
 import kotlin.random.Random
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeSource
 
 /**
@@ -21,17 +23,24 @@ class FathomBot internal constructor(
     random: Random,
     layoutPolicy: LayoutPolicy = LayoutPolicy(),
     samplerSettings: SamplerSettings = SamplerSettings(),
+    timeBudget: Duration = TIME_BUDGET,
     timeSource: TimeSource = TimeSource.Monotonic,
 ) : Bot {
     constructor() : this(Random.Default)
 
-    /** A bot that draws its random choices from the given source, so a game can be repeated. */
+    /** A bot that draws its random choices from the given source. */
     constructor(random: Random) : this(random, LayoutPolicy())
 
-    private val planner = FleetPlanner(LayoutDrafts(random, layoutPolicy))
+    private val budget = TimeBudget(timeBudget, timeSource)
+    private val planner = FleetPlanner(LayoutDrafts(random, layoutPolicy, budget))
     private val waters = EnemyWaters()
     private val picker =
-        ShotPicker(random, listOf(FleetSampler(waters, random, samplerSettings, timeSource), PlacementDensity(waters)))
+        ShotPicker(random, listOf(FleetSampler(waters, random, samplerSettings, budget), PlacementDensity(waters)))
+
+    init {
+        // Builds the tables of placements now, so that the first move does not pay for them.
+        Placements.ALL
+    }
 
     /** Shots the referee did not answer, so it must have refused them. */
     private val refused = mutableSetOf<Position>()
@@ -66,5 +75,8 @@ class FathomBot internal constructor(
 
     private companion object {
         val TOP_LEFT = Position(0, 0)
+
+        /** Drafting a layout or sampling fleets for one answer stops after this long. The referee allows 500 ms. */
+        val TIME_BUDGET = 100.milliseconds
     }
 }

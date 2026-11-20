@@ -19,6 +19,7 @@ private const val SHOTS_SUFFIX = ".shots"
 private const val FREQUENCY_LAYOUTS = 10_000
 private const val LABEL_WIDTH = 20
 private const val CELL_WIDTH = 20
+private const val PERCENT = 100
 
 /** The bot under test, as a shooter and as a layout source. */
 private const val FATHOM = "fathom"
@@ -33,9 +34,9 @@ private val layouts: Map<String, LayoutSource> =
     linkedMapOf(
         SEQUENTIAL to SequentialLayouts(shuffled = false),
         "shuffled" to SequentialLayouts(shuffled = true),
-        FATHOM to BotLayouts { random -> FathomBot(random) },
-        "fathom-no-edge" to BotLayouts { random -> FathomBot(random, LayoutPolicy(edgeChance = 0.0)) },
-        "fathom-first-draft" to BotLayouts { random -> FathomBot(random, LayoutPolicy(drafts = 1)) },
+        FATHOM to BotLayouts { random -> fathom(random) },
+        "fathom-no-edge" to BotLayouts { random -> fathom(random, LayoutPolicy(edgeChance = 0.0)) },
+        "fathom-first-draft" to BotLayouts { random -> fathom(random, LayoutPolicy(drafts = 1)) },
     )
 
 /** Shooters by name. Each is built for the layout source it will shoot at, which only the informed one uses. */
@@ -49,19 +50,21 @@ private fun shooters(seed: Long): Map<String, (LayoutSource) -> (Random) -> Shoo
             val frequencies = PlacementFrequencies(source, FREQUENCY_LAYOUTS, seed)
             return@to { random -> DensityShooter(random, frequencies::weightOf) }
         },
-        FATHOM to { _ -> { random -> fathom(random) } },
-        "fathom-sequential" to { _ -> { random -> fathom(random, sequentialPlacing = 1.0) } },
-        "fathom-any-fleet" to { _ -> { random -> fathom(random, sequentialPlacing = 0.0) } },
-        "fathom-no-sampling" to { _ -> { random -> fathom(random, samples = 0) } },
+        FATHOM to { _ -> { random -> fathom(random).asShooter() } },
+        "fathom-sequential" to
+            { _ -> { random -> fathom(random, sampler = SamplerSettings(sequentialChance = 1.0)).asShooter() } },
+        "fathom-any-fleet" to
+            { _ -> { random -> fathom(random, sampler = SamplerSettings(sequentialChance = 0.0)).asShooter() } },
+        "fathom-no-sampling" to
+            { _ -> { random -> fathom(random, sampler = SamplerSettings(samples = 0)).asShooter() } },
     )
 
-/** The bot as a shooter, without a time budget, so that a table does not depend on how fast the machine is. */
+/** The bot without a time budget, so that a table does not depend on how fast the machine is. */
 private fun fathom(
     random: Random,
-    samples: Int = SamplerSettings().samples,
-    sequentialPlacing: Double = SamplerSettings().sequentialPlacing,
-): Shooter =
-    FathomBot(random, samplerSettings = SamplerSettings(samples, Duration.INFINITE, sequentialPlacing)).asShooter()
+    layout: LayoutPolicy = LayoutPolicy(),
+    sampler: SamplerSettings = SamplerSettings(),
+) = FathomBot(random, layout, sampler, timeBudget = Duration.INFINITE)
 
 /**
  * Without arguments prints the shot table for 1000 games and seed 1. Arguments:
@@ -133,8 +136,6 @@ private fun printShotTable(
         println(row(shooter, listOf("%.1f%%".format(Locale.ROOT, share * PERCENT))))
     }
 }
-
-private const val PERCENT = 100
 
 private fun row(
     label: String,

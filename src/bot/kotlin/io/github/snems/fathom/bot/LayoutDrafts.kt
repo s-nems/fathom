@@ -21,6 +21,7 @@ internal class LayoutPolicy(
 internal class LayoutDrafts(
     private val random: Random,
     private val policy: LayoutPolicy,
+    private val timeBudget: TimeBudget,
 ) {
     /**
      * The best of several random layouts that add ships of [sizes], in that order, to [placed], or null when
@@ -32,8 +33,22 @@ internal class LayoutDrafts(
         sizes: List<Int>,
         refused: Set<ShipPlacement>,
         cautious: Boolean,
-    ): List<ShipPlacement>? =
-        List(policy.drafts) { draft(placed, sizes, refused, cautious) }.filterNotNull().maxByOrNull(::freeCells)
+    ): List<ShipPlacement>? {
+        val deadline = timeBudget.start()
+        var best: List<ShipPlacement>? = null
+        var mostFree = -1
+        var drawn = 0
+        while (drawn < policy.drafts && (drawn == 0 || deadline.hasNotPassedNow())) {
+            val layout = draft(placed, sizes, refused, cautious)
+            val free = layout?.let(::freeCells) ?: -1
+            if (free > mostFree) {
+                best = layout
+                mostFree = free
+            }
+            drawn++
+        }
+        return best
+    }
 
     private fun draft(
         placed: List<ShipPlacement>,
@@ -45,7 +60,7 @@ internal class LayoutDrafts(
         placed.forEach { claim(Candidate.of(it), taken, cautious) }
         val layout = placed.toMutableList()
         for (size in sizes) {
-            val fitting = Candidate.BY_SIZE.getValue(size).filter { !taken.overlaps(it) && it.ship !in refused }
+            val fitting = Candidate.BY_SIZE.getValue(size).filter { !taken.overlaps(it.covered) && it.ship !in refused }
             val favoursEdge = size >= policy.longShipSize && random.nextDouble() < policy.edgeChance
             val alongEdge = if (favoursEdge) fitting.filter { it.isAlongEdge } else emptyList()
             val choice = alongEdge.ifEmpty { fitting }.randomOrNull(random) ?: return null
@@ -61,14 +76,14 @@ internal class LayoutDrafts(
         taken: CellSet,
         cautious: Boolean,
     ) {
-        taken.addClaimOf(candidate)
+        taken.add(candidate.claim)
         if (cautious) candidate.corners.forEach(taken::add)
     }
 
     /** Cells that are neither part of a ship nor share an edge with one. */
     private fun freeCells(layout: List<ShipPlacement>): Int {
         val taken = CellSet()
-        layout.forEach { taken.addClaimOf(Candidate.of(it)) }
+        layout.forEach { taken.add(Candidate.of(it).claim) }
         return CELL_COUNT - taken.size
     }
 }

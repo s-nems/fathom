@@ -22,7 +22,7 @@ class PlacingFleetTest {
     fun shouldPlaceALegalFleetShipByShip() {
         repeat(SEEDS) { seed ->
             // when
-            val fleet = fleetOf(FathomBot(Random(seed)))
+            val fleet = fleetOf(untimedBot(Random(seed)))
 
             // then
             fleet shouldHaveSize FLEET_SHIP_SIZES.size
@@ -34,7 +34,7 @@ class PlacingFleetTest {
         repeat(SEEDS) { seed ->
             // given
             val random = Random(seed)
-            val bot = FathomBot(random)
+            val bot = untimedBot(random)
             val sizes = FLEET_SHIP_SIZES.shuffled(random).toMutableList()
             val placed = mutableListOf<ShipPlacement>()
 
@@ -52,7 +52,7 @@ class PlacingFleetTest {
     @Test
     fun shouldCompleteAFleetItDidNotStart() {
         // given
-        val bot = FathomBot(Random(SEED))
+        val bot = untimedBot(Random(SEED))
         var fleet = COMPLETE.take(STARTED_BY_SOMEONE_ELSE).fold(Fleet.EMPTY, Fleet::place)
 
         // when
@@ -67,7 +67,7 @@ class PlacingFleetTest {
     @Test
     fun shouldFollowItsPlanWhenTheRefereeKeepsOneGrowingList() {
         // given
-        val bot = FathomBot(Random(SEED))
+        val bot = untimedBot(Random(SEED))
         val growing = mutableListOf<ShipPlacement>()
         var fleet = Fleet.EMPTY
 
@@ -79,13 +79,13 @@ class PlacingFleetTest {
         }
 
         // then
-        fleet.ships shouldBe fleetOf(FathomBot(Random(SEED)))
+        fleet.ships shouldBe fleetOf(untimedBot(Random(SEED)))
     }
 
     @Test
     fun shouldAnswerDifferentlyEachTimeAPlacementIsRefused() {
         // given
-        val bot = FathomBot(Random(SEED))
+        val bot = untimedBot(Random(SEED))
 
         // when
         val answers = List(ATTEMPTS) { bot.placeShip(emptyList(), FLEET_SHIP_SIZES) }
@@ -102,7 +102,7 @@ class PlacingFleetTest {
     fun shouldKeepLaterShipsApartEvenAtCornersOnceAPlacementWasRefused() {
         repeat(SEEDS) { seed ->
             // given
-            val bot = FathomBot(Random(seed))
+            val bot = untimedBot(Random(seed))
             val refusedAt = seed % FLEET_SHIP_SIZES.size
             var fleet = Fleet.EMPTY
 
@@ -124,7 +124,7 @@ class PlacingFleetTest {
     fun shouldNeverBeRefusedThreeTimesInARowByARefereeThatForbidsCornerContact() {
         repeat(SEEDS) { seed ->
             // given
-            val bot = FathomBot(Random(seed))
+            val bot = untimedBot(Random(seed))
             val accepted = mutableListOf<ShipPlacement>()
             val sizes = FLEET_SHIP_SIZES.toMutableList()
             var refusedInARow = 0
@@ -151,7 +151,7 @@ class PlacingFleetTest {
         repeat(SEEDS) { seed ->
             // given
             val random = Random(seed)
-            val bot = FathomBot(random)
+            val bot = untimedBot(random)
             var fleet = Fleet.EMPTY
             var refusedInARow = 0
 
@@ -211,7 +211,7 @@ class PlacingFleetTest {
         return fleet.ships
     }
 
-    private fun fleets(policy: LayoutPolicy) = List(SEEDS) { seed -> fleetOf(FathomBot(Random(seed), policy)) }
+    private fun fleets(policy: LayoutPolicy) = List(SEEDS) { seed -> fleetOf(untimedBot(Random(seed), policy)) }
 
     /** Share of the ships of the given size, or of the long ships, that lie along an edge of the board. */
     private fun edgeShare(

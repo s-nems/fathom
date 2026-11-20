@@ -1,25 +1,16 @@
 package io.github.snems.fathom.bot
 
 import kotlin.random.Random
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.TimeSource
 
 /** How the bot samples the fleets the opponent may have. */
 internal class SamplerSettings(
     /** Fleets drawn for one shot. */
     val samples: Int = 2_000,
     /**
-     * Sampling for one shot stops after this long, however many fleets were drawn. A warm JVM draws all of them
-     * in about a fifth of this. The budget matters on a cold or slow one, where a move must still stay well
-     * under the limit of the referee.
-     */
-    val timeBudget: Duration = 100.milliseconds,
-    /**
      * The chance the bot gives to the opponent having placed ship after ship at random. See [PlacingBelief].
      * Of the values measured, an even chance costs the least on the kind of layout it suits worst.
      */
-    val sequentialPlacing: Double = 0.5,
+    val sequentialChance: Double = 0.5,
 )
 
 /**
@@ -27,27 +18,21 @@ internal class SamplerSettings(
  * counting each ship on its own, a whole fleet respects that ships keep each other at a distance.
  *
  * A fleet is drawn ship by ship: first a ship through every open hit that no earlier ship covers, then the
- * remaining sizes, largest first, each at random among the placements still free. Such drawing does not produce
- * every fleet equally often, so a fleet counts with a weight that undoes this:
- *
- * - the number of choices at each step, multiplied together, because a fleet reached through many choices is
- *   drawn rarely,
- * - divided, for each size, by the number of orders in which the ships drawn in the second step could have come
- *   up, because each order is a separate way to reach the same fleet. The first step has one way only: the ship
- *   through a hit is fixed by the fleet.
- *
- * The weight is then multiplied by how likely the opponent is to have placed such a fleet.
+ * remaining sizes, largest first, each at random among the placements still free. That does not produce every
+ * fleet equally often, so a fleet counts with a weight that undoes it: the number of choices at each step,
+ * divided for each size by the number of orders in which its ships of the second step could have come up. The
+ * weight is then multiplied by how likely the opponent is to have placed such a fleet.
  */
 internal class FleetSampler(
     private val waters: EnemyWaters,
     private val random: Random,
     private val settings: SamplerSettings,
-    private val timeSource: TimeSource,
+    private val timeBudget: TimeBudget,
 ) : ShotWeights {
-    private val belief = PlacingBelief(settings.sequentialPlacing, random)
+    private val belief = PlacingBelief(settings.sequentialChance, random)
 
     override fun weights(): DoubleArray {
-        val deadline = timeSource.markNow() + settings.timeBudget
+        val deadline = timeBudget.start()
         val draw = Draw()
         val weights = DoubleArray(CELL_COUNT)
         var drawn = 0
@@ -69,11 +54,14 @@ internal class FleetSampler(
 
         /** Number of ships afloat by size. */
         private val shipsAfloat =
-            IntArray(Placements.SIZES.first() + 1).also { count ->
+            IntArray(Placements.SIZE_INDICES).also { count ->
                 waters.afloat.forEach { count[it]++ }
             }
 
-        /** By ship size, the placements a ship afloat may take that pass through no hit. */
+        /**
+         * By ship size, the placements a ship afloat may take that pass through no hit. By the time they are
+         * used a ship covers every hit, so leaving these out only shortens the scan.
+         */
         private val offHits: Array<Placements> =
             Placements.bySize { size ->
                 Candidate.BY_SIZE.getValue(size).filter { waters.allows(it) && !waters.passesThroughHit(it) }
@@ -95,8 +83,10 @@ internal class FleetSampler(
         private val toDraw = IntArray(shipsAfloat.size)
         private val covered = CellSet()
         private val claimed = CellSet()
-        private val choice = IntArray(Placements.MOST)
-        private val choiceSize = IntArray(Placements.MOST)
+
+        /** The placements to choose from at one step, and for a ship through a hit also the size of each. */
+        private val free = IntArray(Placements.MOST_OF_A_SIZE * Placements.SIZES.size)
+        private val freeSize = IntArray(free.size)
 
         /** Draws a fleet into [ships] and returns its weight, or 0 when the drawing ran into a dead end. */
         fun nextFleet(): Double {
@@ -113,11 +103,11 @@ internal class FleetSampler(
                 weight *= choices
             }
             for (size in sizes) {
-                for (drawn in 1..toDraw[size]) {
-                    val choices = offHits[size].freeOf(claimed, choice)
+                for (nth in 1..toDraw[size]) {
+                    val choices = offHits[size].freeOf(claimed, free)
                     if (choices == 0) return 0.0
-                    place(offHits[size][choice[random.nextInt(choices)]])
-                    weight *= choices.toDouble() / drawn
+                    place(offHits[size][free[random.nextInt(choices)]])
+                    weight *= choices.toDouble() / nth
                 }
             }
             return weight * belief.weightOf(waters.sunk, ships)
@@ -131,22 +121,22 @@ internal class FleetSampler(
             var choices = 0
             for (size in sizes) {
                 if (toDraw[size] == 0) continue
-                val found = placements[size].freeOf(claimed, choice, start = choices)
-                choiceSize.fill(size, choices, choices + found)
+                val found = placements[size].freeOf(claimed, free, start = choices)
+                freeSize.fill(size, choices, choices + found)
                 choices += found
             }
             if (choices == 0) return 0
             val chosen = random.nextInt(choices)
-            val size = choiceSize[chosen]
-            place(placements[size][choice[chosen]])
+            val size = freeSize[chosen]
+            place(placements[size][free[chosen]])
             toDraw[size]--
             return choices
         }
 
         private fun place(ship: Candidate) {
             ships += ship
-            covered.addCellsOf(ship)
-            claimed.addClaimOf(ship)
+            covered.add(ship.covered)
+            claimed.add(ship.claim)
         }
     }
 }

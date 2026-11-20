@@ -1,22 +1,20 @@
 package io.github.snems.fathom.bot
 
+import io.github.snems.fathom.board.FLEET_SHIP_SIZES
+
 /** Some placements of one ship size, with their cells side by side so that a scan over them is fast. */
 internal class Placements(
     private val candidates: List<Candidate>,
 ) {
-    private val low = LongArray(candidates.size) { candidates[it].cellsLow }
-    private val high = LongArray(candidates.size) { candidates[it].cellsHigh }
+    private val low = LongArray(candidates.size) { candidates[it].covered.low }
+    private val high = LongArray(candidates.size) { candidates[it].covered.high }
 
     operator fun get(index: Int): Candidate = candidates[index]
 
     /** How many of the placements cover none of the taken cells. */
     fun countFreeOf(taken: CellSet): Int {
-        val takenLow = taken.low
-        val takenHigh = taken.high
         var free = 0
-        for (index in low.indices) {
-            if ((low[index] and takenLow) == 0L && (high[index] and takenHigh) == 0L) free++
-        }
+        forEachFreeOf(taken) { free++ }
         return free
     }
 
@@ -29,30 +27,37 @@ internal class Placements(
         indices: IntArray,
         start: Int = 0,
     ): Int {
+        var next = start
+        forEachFreeOf(taken) { indices[next++] = it }
+        return next - start
+    }
+
+    private inline fun forEachFreeOf(
+        taken: CellSet,
+        action: (Int) -> Unit,
+    ) {
         val takenLow = taken.low
         val takenHigh = taken.high
-        var next = start
         for (index in low.indices) {
-            if ((low[index] and takenLow) == 0L && (high[index] and takenHigh) == 0L) indices[next++] = index
+            if ((low[index] and takenLow) == 0L && (high[index] and takenHigh) == 0L) action(index)
         }
-        return next - start
     }
 
     companion object {
         /** Ship sizes of the fleet, largest first, each once. */
-        val SIZES: IntArray =
-            Candidate.BY_SIZE.keys
-                .sortedDescending()
-                .toIntArray()
+        val SIZES: IntArray = FLEET_SHIP_SIZES.distinct().sortedDescending().toIntArray()
 
-        /** The largest number of placements any ship size has. */
-        val MOST: Int = Candidate.BY_SIZE.values.maxOf { it.size }
+        /** Length of an array that is indexed by ship size. */
+        val SIZE_INDICES: Int = SIZES.first() + 1
+
+        /** The largest number of placements a ship size has. */
+        val MOST_OF_A_SIZE: Int = Candidate.BY_SIZE.values.maxOf { it.size }
 
         /** Every placement on the board, looked up by ship size. */
         val ALL: Array<Placements> = bySize { size -> Candidate.BY_SIZE.getValue(size) }
 
         /** An array to look placements up by ship size. Sizes that are not in the fleet get none. */
         fun bySize(candidates: (Int) -> List<Candidate>): Array<Placements> =
-            Array(SIZES.first() + 1) { size -> Placements(if (size in SIZES) candidates(size) else emptyList()) }
+            Array(SIZE_INDICES) { size -> Placements(if (size in SIZES) candidates(size) else emptyList()) }
     }
 }

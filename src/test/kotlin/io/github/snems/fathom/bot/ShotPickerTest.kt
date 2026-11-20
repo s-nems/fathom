@@ -53,6 +53,15 @@ class ShotPickerTest {
     }
 
     @Test
+    fun shouldBreakTiesAtRandom() {
+        // when
+        val shots = List(PICKERS) { seed -> ShotPicker(Random(seed), listOf(silent)).pick(listOf(ORIGIN, FAR)) }
+
+        // then
+        shots.toSet() shouldBe setOf(ORIGIN, FAR)
+    }
+
+    @Test
     fun shouldThrowWhenNoOfferedCellIsOnTheBoard() {
         // given
         val picker = ShotPicker(Random(SEED), listOf(heavyAtOrigin))
@@ -67,10 +76,10 @@ class ShotPickerTest {
             // given
             val random = Random(seed)
             val waters = EnemyWaters()
-            val settings = SamplerSettings(samples = QUICK_SAMPLES, timeBudget = Duration.INFINITE)
-            val sampler = FleetSampler(waters, random, settings, TimeSource.Monotonic)
+            val unlimited = TimeBudget(Duration.INFINITE, TimeSource.Monotonic)
+            val sampler = FleetSampler(waters, random, SamplerSettings(samples = QUICK_SAMPLES), unlimited)
             val picker = ShotPicker(random, listOf(sampler, PlacementDensity(waters)))
-            val target = FleetUnderFire(fleetPlacedBy(FathomBot(random)))
+            val target = FleetUnderFire(fleetPlacedBy(untimedBot(random)))
             var shots = 0
 
             // when
@@ -95,6 +104,7 @@ class ShotPickerTest {
     private companion object {
         const val SEED = 7
         const val FLEETS = 50
+        const val PICKERS = 20
         const val QUICK_SAMPLES = 50
         const val SHOTS_OF_A_POOR_SHOOTER = 80
         val ORIGIN = Position(0, 0)

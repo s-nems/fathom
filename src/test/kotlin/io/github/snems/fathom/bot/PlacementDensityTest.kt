@@ -2,6 +2,7 @@ package io.github.snems.fathom.bot
 
 import io.github.snems.fathom.SampleFleets.ship
 import io.github.snems.fathom.board.Board
+import io.github.snems.fathom.board.FLEET_SHIP_SIZES
 import io.github.snems.fathom.board.cells
 import io.github.snems.fathom.board.edgeNeighbours
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -16,13 +17,10 @@ import jd.mg.ships.tournament.api.ShotResult.HIT
 import jd.mg.ships.tournament.api.ShotResult.MISS
 import jd.mg.ships.tournament.api.ShotResult.SUNK
 import org.junit.jupiter.api.Test
-import kotlin.random.Random
-import io.kotest.matchers.ints.shouldBeGreaterThan as shouldBeMoreThan
 
-class ShotWeightsTest {
+class PlacementDensityTest {
     private val waters = EnemyWaters()
     private val density = PlacementDensity(waters)
-    private val picker = ShotPicker(Random(SEED), listOf(density))
 
     @Test
     fun shouldCountEveryPlacementOnAnEmptyBoard() {
@@ -137,29 +135,26 @@ class ShotWeightsTest {
     }
 
     @Test
-    fun shouldPickTheHeaviestOfferedCell() {
-        // given
-        record(Position(4, 4), HIT)
-        record(Position(5, 4), HIT)
-        val offered = listOf(Position(0, 0), Position(6, 4), Position(9, 9))
-
+    fun shouldTakeASinkingWithoutTheShipAsAHit() {
         // when
-        val shot = picker.pick(offered)
+        record(Position(4, 4), SUNK)
 
         // then
-        shot shouldBe Position(6, 4)
+        waters.isOpenHit(Position(4, 4).index()) shouldBe true
+        waters.afloat shouldBe FLEET_SHIP_SIZES
     }
 
     @Test
-    fun shouldBreakTiesAtRandom() {
+    fun shouldTakeASinkingReportedTwiceAsOne() {
+        // given
+        val sunk = ship(2, 4, 4, HORIZONTAL)
+        record(Position(4, 4), HIT)
+
         // when
-        val firstShots =
-            List(PICKERS) { seed ->
-                ShotPicker(Random(seed), listOf(PlacementDensity(EnemyWaters()))).pick(Board.positions)
-            }
+        repeat(2) { record(Position(5, 4), SUNK, sunk) }
 
         // then
-        firstShots.distinct().size shouldBeMoreThan 1
+        waters.afloat shouldBe FLEET_SHIP_SIZES - sunk.size
     }
 
     private fun record(
@@ -171,8 +166,6 @@ class ShotWeightsTest {
     private fun positive(weights: DoubleArray): List<Position> = Board.positions.filter { weights[it.index()] > 0 }
 
     private companion object {
-        const val SEED = 7
-        const val PICKERS = 20
         val FAR_CORNER = Position(9, 9)
 
         /** One horizontal and one vertical placement for each of the ten ships of the fleet. */

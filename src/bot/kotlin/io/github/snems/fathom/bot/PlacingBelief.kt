@@ -4,34 +4,35 @@ import io.github.snems.fathom.board.FLEET_SHIP_SIZES
 import kotlin.random.Random
 
 /**
- * What the bot believes about how the opponent laid out its fleet. With the chance [sequential] the opponent
- * placed ship after ship, largest first, each at random among the placements still free, which is the simplest
- * way to write a placer. Otherwise any legal fleet is as likely as any other. The two differ: placing ship
- * after ship crowds the later, smaller ships into what is left.
+ * What the bot believes about how the opponent laid out its fleet. With the chance [sequentialChance] the
+ * opponent placed ship after ship, largest first, each at random among the placements still free, which crowds
+ * the later, smaller ships into what is left. Otherwise any legal fleet is as likely as any other.
  */
 internal class PlacingBelief(
-    private val sequential: Double,
+    private val sequentialChance: Double,
     private val random: Random,
 ) {
     private val order = ArrayList<Candidate>(FLEET_SHIP_SIZES.size)
     private val taken = CellSet()
 
     /**
-     * How likely the fleet is under this belief, compared with picking any legal fleet with equal chance.
-     * The fleet is given as the ships already sunk and the ships assumed afloat.
+     * How likely the fleet is under this belief, compared with picking any legal fleet with equal chance. The
+     * fleet is given as the ships already sunk and the ships assumed afloat. The answer is a random estimate
+     * that is right on average, which is all that sampling needs.
      */
     fun weightOf(
         sunk: List<Candidate>,
         afloat: List<Candidate>,
     ): Double {
-        if (sequential == 0.0) return 1.0
-        return sequential * LEGAL_FLEETS * ORDERS * sequentialChanceInOneOrder(sunk, afloat) + (1.0 - sequential)
+        if (sequentialChance == 0.0) return 1.0
+        val sequential = LEGAL_FLEETS * ORDERS * sequentialChanceInOneOrder(sunk, afloat)
+        return sequentialChance * sequential + (1.0 - sequentialChance)
     }
 
     /**
      * The chance that placing ship after ship produces exactly these ships in one order, with ships of equal
      * size in a random order. The chance of the fleet is the sum over all [ORDERS] orders, so one order drawn at
-     * random, times their number, is right on average, and the average is all that sampling needs.
+     * random, times their number, is right on average.
      */
     private fun sequentialChanceInOneOrder(
         sunk: List<Candidate>,
@@ -48,7 +49,7 @@ internal class PlacingBelief(
                 val ship = order[index]
                 if (ship.cells.size != size) continue
                 chance /= Placements.ALL[size].countFreeOf(taken)
-                taken.addClaimOf(ship)
+                taken.add(ship.claim)
             }
         }
         return chance
