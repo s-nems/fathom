@@ -1,7 +1,5 @@
 package io.github.snems.fathom.bot
 
-import io.github.snems.fathom.board.Board
-import jd.mg.ships.tournament.api.Direction
 import jd.mg.ships.tournament.api.ShipPlacement
 import kotlin.random.Random
 
@@ -43,18 +41,14 @@ internal class LayoutDrafts(
         refused: Set<ShipPlacement>,
         cautious: Boolean,
     ): List<ShipPlacement>? {
-        val taken = BooleanArray(CELL_COUNT)
+        val taken = CellSet()
         placed.forEach { claim(Candidate.of(it), taken, cautious) }
         val layout = placed.toMutableList()
         for (size in sizes) {
-            val fitting =
-                Candidate.BY_SIZE
-                    .getValue(size)
-                    .filter { it.ship !in refused && it.cells.none { cell -> taken[cell] } }
-            val alongEdge = fitting.filter { isAlongEdge(it.ship) }
+            val fitting = Candidate.BY_SIZE.getValue(size).filter { !taken.overlaps(it) && it.ship !in refused }
             val favoursEdge = size >= policy.longShipSize && random.nextDouble() < policy.edgeChance
-            val choice =
-                (if (favoursEdge) alongEdge.ifEmpty { fitting } else fitting).randomOrNull(random) ?: return null
+            val alongEdge = if (favoursEdge) fitting.filter { it.isAlongEdge } else emptyList()
+            val choice = alongEdge.ifEmpty { fitting }.randomOrNull(random) ?: return null
             claim(choice, taken, cautious)
             layout += choice.ship
         }
@@ -64,23 +58,17 @@ internal class LayoutDrafts(
     /** Marks the cells no later ship may cover. A cautious draft also keeps the corners around the ship free. */
     private fun claim(
         candidate: Candidate,
-        taken: BooleanArray,
+        taken: CellSet,
         cautious: Boolean,
     ) {
-        candidate.cells.forEach { taken[it] = true }
-        candidate.neighbours.forEach { taken[it] = true }
-        if (cautious) candidate.corners.forEach { taken[it] = true }
+        taken.addClaimOf(candidate)
+        if (cautious) candidate.corners.forEach(taken::add)
     }
 
     /** Cells that are neither part of a ship nor share an edge with one. */
     private fun freeCells(layout: List<ShipPlacement>): Int {
-        val taken = BooleanArray(CELL_COUNT)
-        layout.forEach { claim(Candidate.of(it), taken, cautious = false) }
-        return taken.count { !it }
-    }
-
-    private fun isAlongEdge(ship: ShipPlacement): Boolean {
-        val line = if (ship.direction == Direction.HORIZONTAL) ship.position.y else ship.position.x
-        return line == 0 || line == Board.SIZE - 1
+        val taken = CellSet()
+        layout.forEach { taken.addClaimOf(Candidate.of(it)) }
+        return CELL_COUNT - taken.size
     }
 }

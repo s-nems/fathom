@@ -26,6 +26,15 @@ internal class CellSet {
         high = high or ship.claimHigh
     }
 
+    fun add(cell: Int) {
+        if (cell < Long.SIZE_BITS) low = low or (1L shl cell) else high = high or (1L shl (cell - Long.SIZE_BITS))
+    }
+
+    /** Whether the ship lies on a cell of this set. */
+    fun overlaps(ship: Candidate): Boolean = (low and ship.cellsLow) != 0L || (high and ship.cellsHigh) != 0L
+
+    val size: Int get() = low.countOneBits() + high.countOneBits()
+
     operator fun contains(cell: Int): Boolean =
         if (cell < Long.SIZE_BITS) ((low shr cell) and 1L) == 1L else ((high shr (cell - Long.SIZE_BITS)) and 1L) == 1L
 }

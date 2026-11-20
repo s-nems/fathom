@@ -4,6 +4,7 @@ import io.github.snems.fathom.board.Board
 import io.github.snems.fathom.board.FLEET_SHIP_SIZES
 import io.github.snems.fathom.board.cells
 import io.github.snems.fathom.board.edgeNeighbours
+import jd.mg.ships.tournament.api.Direction
 import jd.mg.ships.tournament.api.Position
 import jd.mg.ships.tournament.api.ShipPlacement
 
@@ -28,6 +29,12 @@ internal class Candidate(
     /** The cells no other ship may cover, as bits: the ship's cells and the cells sharing an edge with it. */
     val claimLow: Long = cellsLow or lowBits(neighbours)
     val claimHigh: Long = cellsHigh or highBits(neighbours)
+
+    /** Whether the ship lies in the first or last row or column, along it. */
+    val isAlongEdge: Boolean =
+        (if (ship.direction == Direction.HORIZONTAL) ship.position.y else ship.position.x).let { line ->
+            line == 0 || line == Board.SIZE - 1
+        }
 
     /** Whether this ship and the other neither overlap nor share an edge. */
     fun keepsClearOf(other: Candidate): Boolean =
