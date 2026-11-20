@@ -2,6 +2,7 @@ package io.github.snems.fathom.bot
 
 import jd.mg.ships.tournament.api.ShipPlacement
 import kotlin.random.Random
+import kotlin.time.TimeMark
 
 /** How the bot lays out its fleet. */
 internal class LayoutPolicy(
@@ -21,20 +22,19 @@ internal class LayoutPolicy(
 internal class LayoutDrafts(
     private val random: Random,
     private val policy: LayoutPolicy,
-    private val timeBudget: TimeBudget,
 ) {
     /**
      * The best of several random layouts that add ships of [sizes], in that order, to [placed], or null when
      * every draft ran into a dead end. No draft uses a ship from [refused]. A [cautious] draft also keeps ships
-     * apart at corners.
+     * apart at corners. Drafting stops at the [deadline], with at least one layout drawn.
      */
     fun best(
         placed: List<ShipPlacement>,
         sizes: List<Int>,
         refused: Set<ShipPlacement>,
         cautious: Boolean,
+        deadline: TimeMark,
     ): List<ShipPlacement>? {
-        val deadline = timeBudget.start()
         var best: List<ShipPlacement>? = null
         var mostFree = -1
         var drawn = 0

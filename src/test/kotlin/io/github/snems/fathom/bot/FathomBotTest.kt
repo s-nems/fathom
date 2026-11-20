@@ -12,7 +12,6 @@ import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.shouldBe
-import jd.mg.ships.tournament.api.Bot
 import jd.mg.ships.tournament.api.Direction.HORIZONTAL
 import jd.mg.ships.tournament.api.Position
 import jd.mg.ships.tournament.api.Shot
@@ -27,11 +26,8 @@ import kotlin.time.TestTimeSource
 class FathomBotTest {
     @Test
     fun shouldHaveAPublicConstructorWithoutArguments() {
-        // when
-        val bot = FathomBot::class.java.getConstructor().newInstance()
-
-        // then
-        (bot is Bot) shouldBe true
+        // when, then
+        shouldNotThrowAny { FathomBot::class.java.getConstructor().newInstance() }
     }
 
     @Test

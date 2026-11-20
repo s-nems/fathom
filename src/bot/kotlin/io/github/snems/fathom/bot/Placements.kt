@@ -48,7 +48,7 @@ internal class Placements(
         val SIZES: IntArray = FLEET_SHIP_SIZES.distinct().sortedDescending().toIntArray()
 
         /** Length of an array that is indexed by ship size. */
-        val SIZE_INDICES: Int = SIZES.first() + 1
+        val LENGTH_BY_SIZE: Int = SIZES.first() + 1
 
         /** The largest number of placements a ship size has. */
         val MOST_OF_A_SIZE: Int = Candidate.BY_SIZE.values.maxOf { it.size }
@@ -58,6 +58,6 @@ internal class Placements(
 
         /** An array to look placements up by ship size. Sizes that are not in the fleet get none. */
         fun bySize(candidates: (Int) -> List<Candidate>): Array<Placements> =
-            Array(SIZE_INDICES) { size -> Placements(if (size in SIZES) candidates(size) else emptyList()) }
+            Array(LENGTH_BY_SIZE) { size -> Placements(if (size in SIZES) candidates(size) else emptyList()) }
     }
 }

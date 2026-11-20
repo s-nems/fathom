@@ -144,13 +144,8 @@ class FleetSamplerTest {
         val stoppedByTime = FleetSampler(waters, Random(SEED), unlimitedSamples, budget).weights()
 
         // then
-        val drawn =
-            (1..TICKS_IN_BUDGET).filter {
-                sample(
-                    SamplerSettings().sequentialChance,
-                    it,
-                ).contentEquals(stoppedByTime)
-            }
+        val belief = SamplerSettings().sequentialChance
+        val drawn = (1..TICKS_IN_BUDGET).filter { samples -> sample(belief, samples).contentEquals(stoppedByTime) }
         drawn shouldBe listOf(FLEETS_DRAWN_IN_BUDGET)
     }
 
@@ -220,11 +215,8 @@ class FleetSamplerTest {
             val taken = claimOf(sunk + fleet).also { it.or(misses) }
             // Ships of equal size are taken in one order only, so that each fleet is listed once.
             val start = fleet.lastOrNull()?.takeIf { it.size == size }?.let { placements.indexOf(it) + 1 } ?: 0
-            placements
-                .drop(
-                    start,
-                ).filter { !cellsOf(it).intersects(taken) }
-                .forEach { extend(fleet + it, sizes.drop(1)) }
+            val fitting = placements.drop(start).filter { !cellsOf(it).intersects(taken) }
+            fitting.forEach { extend(fleet + it, sizes.drop(1)) }
         }
         extend(emptyList(), sunk.fold(FLEET_SHIP_SIZES) { sizes, ship -> sizes - ship.size })
         return sums

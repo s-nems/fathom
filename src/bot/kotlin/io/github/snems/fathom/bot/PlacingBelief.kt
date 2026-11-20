@@ -12,6 +12,8 @@ internal class PlacingBelief(
     private val sequentialChance: Double,
     private val random: Random,
 ) {
+    /** Looked up when the bot is built, so that its first move does not pay for the tables of placements. */
+    private val everyPlacement = Placements.ALL
     private val order = ArrayList<Candidate>(FLEET_SHIP_SIZES.size)
     private val taken = CellSet()
 
@@ -48,7 +50,7 @@ internal class PlacingBelief(
             for (index in order.indices) {
                 val ship = order[index]
                 if (ship.cells.size != size) continue
-                chance /= Placements.ALL[size].countFreeOf(taken)
+                chance /= everyPlacement[size].countFreeOf(taken)
                 taken.add(ship.claim)
             }
         }

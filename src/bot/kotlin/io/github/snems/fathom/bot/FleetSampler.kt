@@ -54,7 +54,7 @@ internal class FleetSampler(
 
         /** Number of ships afloat by size. */
         private val shipsAfloat =
-            IntArray(Placements.SIZE_INDICES).also { count ->
+            IntArray(Placements.LENGTH_BY_SIZE).also { count ->
                 waters.afloat.forEach { count[it]++ }
             }
 

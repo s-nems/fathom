@@ -28,19 +28,11 @@ class FathomBot internal constructor(
 ) : Bot {
     constructor() : this(Random.Default)
 
-    /** A bot that draws its random choices from the given source. */
-    constructor(random: Random) : this(random, LayoutPolicy())
-
     private val budget = TimeBudget(timeBudget, timeSource)
-    private val planner = FleetPlanner(LayoutDrafts(random, layoutPolicy, budget))
+    private val planner = FleetPlanner(LayoutDrafts(random, layoutPolicy), budget)
     private val waters = EnemyWaters()
     private val picker =
         ShotPicker(random, listOf(FleetSampler(waters, random, samplerSettings, budget), PlacementDensity(waters)))
-
-    init {
-        // Builds the tables of placements now, so that the first move does not pay for them.
-        Placements.ALL
-    }
 
     /** Shots the referee did not answer, so it must have refused them. */
     private val refused = mutableSetOf<Position>()

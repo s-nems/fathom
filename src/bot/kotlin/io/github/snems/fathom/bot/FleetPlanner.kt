@@ -9,6 +9,7 @@ import jd.mg.ships.tournament.api.ShipPlacement
  */
 internal class FleetPlanner(
     private val drafts: LayoutDrafts,
+    private val timeBudget: TimeBudget,
 ) {
     private var plan: List<ShipPlacement> = emptyList()
     private var lastAnswer: ShipPlacement? = null
@@ -45,14 +46,20 @@ internal class FleetPlanner(
         size: Int,
     ): ShipPlacement? = plan.takeIf { it.containsAll(placed) }?.firstOrNull { it.size == size && it !in placed }
 
+    /**
+     * A new plan and its first ship. If no whole fleet fits, one ship is enough, and if the caution after a
+     * refusal leaves no room for it, the bot's own reading of the rules has to do.
+     */
     private fun drafted(
         placed: List<ShipPlacement>,
         remainingSizes: List<Int>,
     ): ShipPlacement {
+        val deadline = timeBudget.start()
         val cautious = refused.isNotEmpty()
-        plan = drafts.best(placed, remainingSizes, refused, cautious)
-            ?: drafts.best(placed, remainingSizes.take(1), refused, cautious)
-            ?: drafts.best(placed, remainingSizes.take(1), refused, cautious = false)
+        val nextSize = remainingSizes.take(1)
+        plan = drafts.best(placed, remainingSizes, refused, cautious, deadline)
+            ?: drafts.best(placed, nextSize, refused, cautious, deadline)
+            ?: (if (cautious) drafts.best(placed, nextSize, refused, cautious = false, deadline) else null)
             ?: throw NoSuchElementException("No ship of ${remainingSizes.first()} cells fits among $placed")
         return plan.first { it !in placed }
     }

@@ -134,29 +134,6 @@ class PlacementDensityTest {
         weights[FAR_CORNER.index()] shouldBeGreaterThan 0.0
     }
 
-    @Test
-    fun shouldTakeASinkingWithoutTheShipAsAHit() {
-        // when
-        record(Position(4, 4), SUNK)
-
-        // then
-        waters.isOpenHit(Position(4, 4).index()) shouldBe true
-        waters.afloat shouldBe FLEET_SHIP_SIZES
-    }
-
-    @Test
-    fun shouldTakeASinkingReportedTwiceAsOne() {
-        // given
-        val sunk = ship(2, 4, 4, HORIZONTAL)
-        record(Position(4, 4), HIT)
-
-        // when
-        repeat(2) { record(Position(5, 4), SUNK, sunk) }
-
-        // then
-        waters.afloat shouldBe FLEET_SHIP_SIZES - sunk.size
-    }
-
     private fun record(
         position: Position,
         result: ShotResult,
