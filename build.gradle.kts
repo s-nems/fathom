@@ -94,10 +94,12 @@ tasks.check {
 }
 
 tasks.register<JavaExec>("arena") {
-    description = "Measures shooters against layouts. Arguments: --args=\"<games> <seed>\""
+    description = "Measures the bot. --args=\"<games> <seed>\" for shots, --args=\"time\" for call times."
     group = "application"
     classpath = arena.runtimeClasspath
     mainClass = "io.github.snems.fathom.arena.ArenaKt"
+    // -Pinterpreted turns the JIT compiler off, which is how slow a JVM is before it has warmed up.
+    if (providers.gradleProperty("interpreted").isPresent) jvmArgs("-Xint")
 }
 
 tasks.test {

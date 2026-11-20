@@ -2,11 +2,15 @@ package io.github.snems.fathom.arena
 
 import io.github.snems.fathom.bot.FathomBot
 import io.github.snems.fathom.bot.LayoutPolicy
+import io.github.snems.fathom.bot.SamplerSettings
 import java.util.Locale
 import kotlin.random.Random
+import kotlin.time.Duration
 
 private const val DEFAULT_GAMES = 1_000
 private const val DEFAULT_SEED = 1L
+private const val DEFAULT_TIMED_GAMES = 3
+private const val TIME = "time"
 private const val FREQUENCY_LAYOUTS = 10_000
 private const val LABEL_WIDTH = 20
 private const val CELL_WIDTH = 20
@@ -40,16 +44,40 @@ private fun shooters(seed: Long): Map<String, (LayoutSource) -> (Random) -> Shoo
             val frequencies = PlacementFrequencies(source, FREQUENCY_LAYOUTS, seed)
             return@to { random -> DensityShooter(random, frequencies::weightOf) }
         },
-        FATHOM to { _ -> { random -> FathomBot(random).asShooter() } },
+        FATHOM to { _ -> { random -> fathom(random) } },
+        "fathom-sequential" to { _ -> { random -> fathom(random, sequentialPlacing = 1.0) } },
+        "fathom-any-fleet" to { _ -> { random -> fathom(random, sequentialPlacing = 0.0) } },
+        "fathom-no-sampling" to { _ -> { random -> fathom(random, samples = 0) } },
     )
+
+/** The bot as a shooter, without a time budget, so that a table does not depend on how fast the machine is. */
+private fun fathom(
+    random: Random,
+    samples: Int = SamplerSettings().samples,
+    sequentialPlacing: Double = SamplerSettings().sequentialPlacing,
+): Shooter =
+    FathomBot(random, samplerSettings = SamplerSettings(samples, Duration.INFINITE, sequentialPlacing)).asShooter()
+
+/**
+ * Without arguments prints the shot table for 1000 games and seed 1. Arguments: `<games> <seed>` for the shot
+ * table, or `time <games>` for the longest calls of the bot.
+ */
+fun main(args: Array<String>) {
+    if (args.firstOrNull() == TIME) {
+        printMoveTimes({ random -> FathomBot(random) }, args.getOrNull(1)?.toInt() ?: DEFAULT_TIMED_GAMES, DEFAULT_SEED)
+    } else {
+        printShotTable(args.getOrNull(0)?.toInt() ?: DEFAULT_GAMES, args.getOrNull(1)?.toLong() ?: DEFAULT_SEED)
+    }
+}
 
 /**
  * Prints the mean shots each shooter needs to sink the fleets of each layout source, then the share of games the
- * bot would win against each shooter. Arguments: number of games (default 1000), seed (default 1).
+ * bot would win against each shooter.
  */
-fun main(args: Array<String>) {
-    val games = args.getOrNull(0)?.toInt() ?: DEFAULT_GAMES
-    val seed = args.getOrNull(1)?.toLong() ?: DEFAULT_SEED
+private fun printShotTable(
+    games: Int,
+    seed: Long,
+) {
     val ranges = layouts.mapValues { (_, source) -> ShootingRange(source, games, seed) }
     val shots =
         shooters(seed).mapValues { (_, shooter) ->

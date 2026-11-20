@@ -11,6 +11,8 @@ log, and a bot for a tournament run by someone else's engine.
 | Build, check, test | `./gradlew build` |
 | One test class | `./gradlew test --tests '*FleetTest'` |
 | Play one game | `./gradlew run` |
+| Shots per shooter and layout | `./gradlew arena --args="1000 1"` |
+| Longest calls of the bot | `./gradlew arena --args="time"`, add `-Pinterpreted` for a cold JVM |
 
 Run the formatter and the build as two invocations.
 
