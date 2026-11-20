@@ -1,0 +1,101 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+plugins {
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kover)
+    alias(libs.plugins.spotless)
+    application
+}
+
+group = "io.github.snems"
+version = "0.1.0-SNAPSHOT"
+
+val javaVersion =
+    libs.versions.java
+        .get()
+        .toInt()
+val botJavaVersion =
+    libs.versions.botJava
+        .get()
+        .toInt()
+
+repositories {
+    mavenCentral()
+}
+
+// The bot is copied into another engine, so it lives in its own source set with nothing but the standard library.
+val bot: SourceSet by sourceSets.creating
+
+sourceSets.main {
+    compileClasspath += bot.output
+    runtimeClasspath += bot.output
+}
+
+dependencies {
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.kotest.assertions)
+    testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+kotlin {
+    jvmToolchain(javaVersion)
+    compilerOptions {
+        allWarningsAsErrors = true
+        extraWarnings = true
+    }
+    // Tests see the bot, including what is internal to it.
+    target.compilations.named("test") {
+        associateWith(target.compilations.getByName("bot"))
+    }
+}
+
+tasks.named<KotlinCompile>("compileBotKotlin") {
+    compilerOptions {
+        // The engine that receives the bot may run an older Kotlin and an older JDK than this build.
+        languageVersion = KotlinVersion.KOTLIN_2_1
+        apiVersion = KotlinVersion.KOTLIN_2_1
+        jvmTarget = JvmTarget.fromTarget(botJavaVersion.toString())
+        freeCompilerArgs.add("-Xjdk-release=$botJavaVersion")
+        // Compiling for an older language version is the point here, not an oversight.
+        freeCompilerArgs.add("-Xsuppress-version-warnings")
+    }
+}
+
+// The source set has no Java, but Gradle checks that its Java and Kotlin tasks agree on the target.
+tasks.named<JavaCompile>(bot.compileJavaTaskName) {
+    options.release = botJavaVersion
+}
+
+// The program ships as one jar, so the bot goes into it.
+tasks.jar {
+    from(bot.output)
+}
+
+application {
+    mainClass = "io.github.snems.fathom.app.MainKt"
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        events(TestLogEvent.FAILED, TestLogEvent.SKIPPED)
+        exceptionFormat = TestExceptionFormat.FULL
+    }
+}
+
+spotless {
+    kotlin {
+        target("src/**/*.kt")
+        // The contract file is provided and stays byte for byte as received.
+        targetExclude("src/bot/kotlin/jd/**")
+        ktlint(libs.versions.ktlint.get())
+    }
+    kotlinGradle {
+        ktlint(libs.versions.ktlint.get())
+    }
+}

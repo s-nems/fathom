@@ -1,0 +1,20 @@
+[versions]
+java = "25"
+botJava = "17"
+kotlin = "2.4.21"
+junit = "6.1.3"
+kotest = "6.2.7"
+kover = "0.9.11"
+spotless = "8.11.0"
+ktlint = "1.8.0"
+
+[libraries]
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
