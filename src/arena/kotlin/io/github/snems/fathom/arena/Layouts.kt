@@ -7,12 +7,26 @@ import io.github.snems.fathom.board.claimedCells
 import io.github.snems.fathom.game.Fleet
 import jd.mg.ships.tournament.api.Bot
 import jd.mg.ships.tournament.api.ShipPlacement
+import java.util.stream.IntStream
 import kotlin.random.Random
 
 /** A way of placing a whole fleet. */
 fun interface LayoutSource {
     fun layout(random: Random): List<ShipPlacement>
 }
+
+/** Many layouts of the source, each from its own random stream so that they can be drawn in parallel. */
+fun LayoutSource.layouts(
+    count: Int,
+    seed: Long,
+): List<List<ShipPlacement>> =
+    IntStream
+        .range(0, count)
+        .parallel()
+        .mapToObj { index -> layout(Random(seed * LAYOUT_STRIDE + index)) }
+        .toList()
+
+private const val LAYOUT_STRIDE = 1_000_003L
 
 /**
  * Places ship after ship, each at random among the placements still legal, and starts over at a dead end.

@@ -2,6 +2,7 @@ package io.github.snems.fathom.arena
 
 import io.github.snems.fathom.game.Fleet
 import io.github.snems.fathom.game.FleetUnderFire
+import jd.mg.ships.tournament.api.ShipPlacement
 import java.util.stream.IntStream
 import kotlin.random.Random
 
@@ -10,19 +11,21 @@ import kotlin.random.Random
  * can be compared fleet by fleet.
  */
 class ShootingRange(
-    layouts: LayoutSource,
-    private val games: Int,
+    private val fleets: List<Fleet>,
     private val seed: Long,
 ) {
-    private val fleets: List<Fleet> =
-        (0 until games).map { game -> layouts.layout(randomFor(game, LAYOUT_STREAM)).fold(Fleet.EMPTY, Fleet::place) }
+    /** A range of [games] fleets drawn from [layouts]. */
+    constructor(layouts: LayoutSource, games: Int, seed: Long) : this(
+        (0 until games).map { game -> fleetOf(layouts.layout(randomFor(seed, game, LAYOUT_STREAM))) },
+        seed,
+    )
 
     /** Shots a fresh shooter needs to sink each fleet, in the order of the fleets. */
     fun shotsToSink(shooter: (Random) -> Shooter): IntArray =
         IntStream
-            .range(0, games)
+            .range(0, fleets.size)
             .parallel()
-            .map { game -> shotsToSink(shooter(randomFor(game, SHOOTER_STREAM)), fleets[game]) }
+            .map { game -> shotsToSink(shooter(randomFor(seed, game, SHOOTER_STREAM)), fleets[game]) }
             .toArray()
 
     private fun shotsToSink(
@@ -38,15 +41,18 @@ class ShootingRange(
         return shots
     }
 
-    private fun randomFor(
-        game: Int,
-        stream: Long,
-    ) = Random((seed * STREAMS + stream) * GAME_STRIDE + game)
+    companion object {
+        private const val LAYOUT_STREAM = 0L
+        private const val SHOOTER_STREAM = 1L
+        private const val STREAMS = 2L
+        private const val GAME_STRIDE = 1_000_003L
 
-    private companion object {
-        const val LAYOUT_STREAM = 0L
-        const val SHOOTER_STREAM = 1L
-        const val STREAMS = 2L
-        const val GAME_STRIDE = 1_000_003L
+        fun fleetOf(ships: List<ShipPlacement>): Fleet = ships.fold(Fleet.EMPTY, Fleet::place)
+
+        private fun randomFor(
+            seed: Long,
+            game: Int,
+            stream: Long,
+        ) = Random((seed * STREAMS + stream) * GAME_STRIDE + game)
     }
 }
