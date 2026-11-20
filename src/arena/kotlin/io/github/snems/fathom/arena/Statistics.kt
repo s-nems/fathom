@@ -26,12 +26,6 @@ class Estimate(
 
 fun IntArray.estimate() = Estimate(DoubleArray(size) { this[it].toDouble() })
 
-/** This sample minus the other, game by game. Both must come from the same fleets. */
-fun IntArray.differenceTo(other: IntArray): Estimate {
-    require(size == other.size) { "Paired samples have the same size" }
-    return Estimate(DoubleArray(size) { (this[it] - other[it]).toDouble() })
-}
-
 /**
  * Chance that a game needing [mine] shots beats an independent game needing [theirs], when the lower count wins
  * and an equal count is decided by a fair draw of who shoots first.

@@ -6,10 +6,7 @@ import jd.mg.ships.tournament.api.ShipPlacement
 import java.util.stream.IntStream
 import kotlin.random.Random
 
-/**
- * Fixed fleets for shooters to sink, one after another. Every shooter meets the same fleets, so two shooters
- * can be compared fleet by fleet.
- */
+/** Fixed fleets for shooters to sink, one after another. Every shooter meets the same fleets. */
 class ShootingRange(
     private val fleets: List<Fleet>,
     private val seed: Long,
@@ -45,7 +42,6 @@ class ShootingRange(
         private const val LAYOUT_STREAM = 0L
         private const val SHOOTER_STREAM = 1L
         private const val STREAMS = 2L
-        private const val GAME_STRIDE = 1_000_003L
 
         fun fleetOf(ships: List<ShipPlacement>): Fleet = ships.fold(Fleet.EMPTY, Fleet::place)
 
@@ -53,6 +49,6 @@ class ShootingRange(
             seed: Long,
             game: Int,
             stream: Long,
-        ) = Random((seed * STREAMS + stream) * GAME_STRIDE + game)
+        ) = Random((seed * STREAMS + stream) * SEED_STRIDE + game)
     }
 }

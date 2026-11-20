@@ -30,7 +30,7 @@ private const val SEQUENTIAL = "sequential"
 /** A density shooter that has seen many layouts of the source it shoots at. */
 private const val INFORMED = "density-informed"
 
-private val layouts: Map<String, LayoutSource> =
+private val layoutSources: Map<String, LayoutSource> =
     linkedMapOf(
         SEQUENTIAL to SequentialLayouts(shuffled = false),
         "shuffled" to SequentialLayouts(shuffled = true),
@@ -82,7 +82,7 @@ fun main(args: Array<String>) {
 
         LAYOUTS -> {
             val (source, games, seed, file) = args.drop(1)
-            LayoutFile.write(Path.of(file), layouts.getValue(source).layouts(games.toInt(), seed.toLong()))
+            LayoutFile.write(Path.of(file), layoutSources.getValue(source).draw(games.toInt(), seed.toLong()))
         }
 
         SHOTS -> {
@@ -97,7 +97,8 @@ fun main(args: Array<String>) {
 
 /**
  * Prints the mean shots each shooter needs to sink the fleets of a file, each fleet once, and writes the shots
- * of the bot, fleet by fleet, next to the file.
+ * of the bot, fleet by fleet, next to the file. The informed shooter counts placements in the same file, so a
+ * small file flatters it.
  */
 private fun printShotsAt(file: Path) {
     val fleets = LayoutFile.read(file)
@@ -118,14 +119,14 @@ private fun printShotTable(
     games: Int,
     seed: Long,
 ) {
-    val ranges = layouts.mapValues { (_, source) -> ShootingRange(source, games, seed) }
+    val ranges = layoutSources.mapValues { (_, source) -> ShootingRange(source, games, seed) }
     val shots =
         shooters(seed).mapValues { (_, shooter) ->
-            layouts.mapValues { (layout, source) -> ranges.getValue(layout).shotsToSink(shooter(source)) }
+            layoutSources.mapValues { (layout, source) -> ranges.getValue(layout).shotsToSink(shooter(source)) }
         }
 
     println("Mean shots to sink the fleet, 95% interval, $games games per cell, seed $seed")
-    println(row("shooter \\ layouts", layouts.keys))
+    println(row("shooter \\ layouts", layoutSources.keys))
     shots.forEach { (shooter, byLayout) -> println(row(shooter, byLayout.values.map { it.estimate().toString() })) }
 
     println()

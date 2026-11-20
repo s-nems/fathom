@@ -28,7 +28,7 @@ repositories {
 }
 
 // The bot is copied into another engine, so it lives in its own source set with nothing but the standard library.
-val bot: SourceSet by sourceSets.creating
+val bot: SourceSet = sourceSets.create("bot")
 
 sourceSets.main {
     compileClasspath += bot.output
@@ -36,9 +36,16 @@ sourceSets.main {
 }
 
 // Opponents and measurements. Not part of the program.
-val arena: SourceSet by sourceSets.creating {
-    compileClasspath += bot.output + sourceSets.main.get().output
-    runtimeClasspath += bot.output + sourceSets.main.get().output
+val arena: SourceSet =
+    sourceSets.create("arena") {
+        compileClasspath += bot.output + sourceSets.main.get().output
+        runtimeClasspath += bot.output + sourceSets.main.get().output
+    }
+
+// The statistics behind the published numbers are tested like the rest.
+sourceSets.test {
+    compileClasspath += arena.output
+    runtimeClasspath += arena.output
 }
 
 dependencies {
@@ -90,7 +97,7 @@ application {
 
 // The arena has no tests of its own, so the build at least compiles it.
 tasks.check {
-    dependsOn(arena.classesTaskName)
+    dependsOn(arena.classesTaskName, "koverHtmlReport")
 }
 
 tasks.register<JavaExec>("arena") {
@@ -98,7 +105,7 @@ tasks.register<JavaExec>("arena") {
     group = "application"
     classpath = arena.runtimeClasspath
     mainClass = "io.github.snems.fathom.arena.ArenaKt"
-    // -Pinterpreted turns the JIT compiler off, which is how slow a JVM is before it has warmed up.
+    // -Pinterpreted turns the JIT compiler off, the slowest a JVM runs this code.
     if (providers.gradleProperty("interpreted").isPresent) jvmArgs("-Xint")
 }
 
