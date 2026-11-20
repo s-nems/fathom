@@ -1,0 +1,50 @@
+# AGENTS.md
+
+`fathom` is a Battleships game in Kotlin: the rules, a referee, a program that plays one game and writes its
+log, and a bot for a tournament run by someone else's engine.
+
+## Commands
+
+| Task | Command |
+|---|---|
+| Format | `./gradlew spotlessApply` |
+| Build, check, test | `./gradlew build` |
+| One test class | `./gradlew test --tests '*FleetTest'` |
+| Play one game | `./gradlew run` |
+
+Run the formatter and the build as two invocations.
+
+## Layout
+
+| Path | Content |
+|---|---|
+| `src/bot/kotlin` | What the tournament copies: the provided `Bot.kt`, `board` (rules), `bot` (the bot) |
+| `src/main/kotlin` | `game` (referee), `app` (one game and its log) |
+| `src/arena/kotlin` | Opponents and measurements, not part of the program |
+| `src/test/kotlin` | Tests |
+
+## Rules of the code
+
+- `Bot.kt` stays byte for byte as provided.
+- `src/bot/kotlin` uses the Kotlin standard library only. It compiles at language level 2.1 against the JDK 17
+  API, and the build fails on anything newer.
+- The bot never throws and never returns an illegal move. It keeps no state between games.
+- `Game` knows nothing about logs or wall-clock time. It reports events to an observer.
+- Randomness and time are passed in, so every test is deterministic.
+- No literal with a meaning stays unnamed.
+- KDoc of one or two sentences on each type, saying what the signature cannot.
+
+## Tests
+
+- Plain `@Test` methods named `should...`, with `// given`, `// when`, `// then`.
+- Parameterised tests list their rows as literals.
+- Sample ships come from `SampleFleets`, scripted players from `ScriptedBot`.
+- `ReplayingLogTest` replays every log in `src/test/resources/logs` through the referee and compares the log
+  written with the original.
+
+## Working here
+
+- A step is done when `./gradlew build` passes and a separate agent has reviewed it.
+- A change to the bot's play is accepted on a measurement from the arena, not on reasoning.
+- Markdown in this repository is short and factual.
+- Conventional Commits as `type: Description`, one logical change per commit. Never push.
