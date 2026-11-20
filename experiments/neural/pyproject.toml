@@ -1,0 +1,20 @@
+[project]
+name = "fathom-neural"
+version = "0.1.0"
+description = "Neural shooter and placer for Battleships, trained against each other"
+requires-python = ">=3.12"
+# torch warns at import when numpy is missing.
+dependencies = ["numpy>=2", "torch>=2.6"]
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 110
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

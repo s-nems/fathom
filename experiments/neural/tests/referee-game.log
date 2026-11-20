@@ -1,0 +1,116 @@
+16:24:06.175 place-ship: size=5 pos=(3,7) dir=horizontal
+16:24:06.176 place-ship: size=4 pos=(4,9) dir=horizontal
+16:24:06.176 place-ship: size=4 pos=(9,0) dir=vertical
+16:24:06.176 place-ship: size=3 pos=(7,3) dir=vertical
+16:24:06.176 place-ship: size=3 pos=(0,7) dir=vertical
+16:24:06.176 place-ship: size=3 pos=(5,0) dir=horizontal
+16:24:06.176 place-ship: size=2 pos=(0,1) dir=vertical
+16:24:06.176 place-ship: size=2 pos=(0,4) dir=vertical
+16:24:06.176 place-ship: size=2 pos=(5,2) dir=vertical
+16:24:06.176 place-ship: size=2 pos=(9,5) dir=vertical
+16:24:06.213 shot: pos=(9,5) result=miss
+16:24:06.224 enemy-shot: pos=(7,9) result=hit
+16:24:06.235 shot: pos=(4,9) result=hit
+16:24:06.247 enemy-shot: pos=(6,9) result=hit
+16:24:06.258 shot: pos=(5,9) result=hit
+16:24:06.268 enemy-shot: pos=(8,9) result=miss
+16:24:06.278 shot: pos=(6,9) result=hit
+16:24:06.288 enemy-shot: pos=(5,9) result=hit
+16:24:06.297 shot: pos=(7,9) result=miss
+16:24:06.307 enemy-shot: pos=(4,9) result=sunk ship-size=4
+16:24:06.317 shot: pos=(3,9) result=hit
+16:24:06.331 enemy-shot: pos=(9,7) result=miss
+16:24:06.343 shot: pos=(2,9) result=sunk ship-size=5
+16:24:06.351 enemy-shot: pos=(9,2) result=hit
+16:24:06.359 shot: pos=(0,8) result=hit
+16:24:06.368 enemy-shot: pos=(9,3) result=hit
+16:24:06.376 shot: pos=(0,7) result=hit
+16:24:06.385 enemy-shot: pos=(9,4) result=miss
+16:24:06.395 shot: pos=(0,6) result=miss
+16:24:06.405 enemy-shot: pos=(9,1) result=hit
+16:24:06.413 shot: pos=(0,9) result=sunk ship-size=3
+16:24:06.421 enemy-shot: pos=(9,0) result=sunk ship-size=4
+16:24:06.429 shot: pos=(0,3) result=hit
+16:24:06.437 enemy-shot: pos=(8,6) result=miss
+16:24:06.446 shot: pos=(0,2) result=hit
+16:24:06.453 enemy-shot: pos=(6,7) result=hit
+16:24:06.460 shot: pos=(0,4) result=hit
+16:24:06.467 enemy-shot: pos=(7,7) result=hit
+16:24:06.474 shot: pos=(0,5) result=sunk ship-size=4
+16:24:06.481 enemy-shot: pos=(5,7) result=hit
+16:24:06.487 shot: pos=(2,6) result=miss
+16:24:06.493 enemy-shot: pos=(4,7) result=hit
+16:24:06.499 shot: pos=(3,7) result=miss
+16:24:06.505 enemy-shot: pos=(8,7) result=miss
+16:24:06.511 shot: pos=(1,0) result=hit
+16:24:06.517 enemy-shot: pos=(3,7) result=sunk ship-size=5
+16:24:06.522 shot: pos=(2,0) result=hit
+16:24:06.528 enemy-shot: pos=(1,8) result=miss
+16:24:06.534 shot: pos=(3,0) result=miss
+16:24:06.539 enemy-shot: pos=(2,9) result=miss
+16:24:06.544 shot: pos=(0,0) result=sunk ship-size=3
+16:24:06.550 enemy-shot: pos=(0,7) result=hit
+16:24:06.555 shot: pos=(9,3) result=hit
+16:24:06.560 enemy-shot: pos=(0,8) result=hit
+16:24:06.565 shot: pos=(9,2) result=hit
+16:24:06.571 enemy-shot: pos=(0,9) result=sunk ship-size=3
+16:24:06.575 shot: pos=(9,1) result=sunk ship-size=3
+16:24:06.580 enemy-shot: pos=(1,5) result=miss
+16:24:06.584 shot: pos=(7,0) result=hit
+16:24:06.589 enemy-shot: pos=(0,4) result=hit
+16:24:06.593 shot: pos=(6,0) result=hit
+16:24:06.597 enemy-shot: pos=(0,3) result=miss
+16:24:06.601 shot: pos=(5,0) result=hit
+16:24:06.605 enemy-shot: pos=(1,4) result=miss
+16:24:06.609 shot: pos=(8,0) result=sunk ship-size=4
+16:24:06.614 enemy-shot: pos=(0,5) result=sunk ship-size=2
+16:24:06.617 shot: pos=(8,8) result=miss
+16:24:06.621 enemy-shot: pos=(7,5) result=hit
+16:24:06.625 shot: pos=(7,7) result=hit
+16:24:06.629 enemy-shot: pos=(8,5) result=miss
+16:24:06.632 shot: pos=(7,8) result=sunk ship-size=2
+16:24:06.636 enemy-shot: pos=(7,4) result=hit
+16:24:06.639 shot: pos=(3,5) result=miss
+16:24:06.642 enemy-shot: pos=(7,3) result=sunk ship-size=3
+16:24:06.645 shot: pos=(5,6) result=miss
+16:24:06.649 enemy-shot: pos=(6,1) result=miss
+16:24:06.651 shot: pos=(4,6) result=hit
+16:24:06.655 enemy-shot: pos=(5,2) result=hit
+16:24:06.658 shot: pos=(4,7) result=sunk ship-size=2
+16:24:06.661 enemy-shot: pos=(5,3) result=sunk ship-size=2
+16:24:06.663 shot: pos=(6,5) result=miss
+16:24:06.666 enemy-shot: pos=(5,0) result=hit
+16:24:06.669 shot: pos=(7,4) result=miss
+16:24:06.672 enemy-shot: pos=(6,0) result=hit
+16:24:06.674 shot: pos=(6,3) result=miss
+16:24:06.677 enemy-shot: pos=(7,0) result=sunk ship-size=3
+16:24:06.679 shot: pos=(5,4) result=miss
+16:24:06.682 enemy-shot: pos=(3,1) result=miss
+16:24:06.684 shot: pos=(8,5) result=miss
+16:24:06.687 enemy-shot: pos=(1,1) result=miss
+16:24:06.690 shot: pos=(2,4) result=miss
+16:24:06.692 enemy-shot: pos=(2,0) result=miss
+16:24:06.695 shot: pos=(3,3) result=hit
+16:24:06.697 enemy-shot: pos=(2,2) result=miss
+16:24:06.700 shot: pos=(2,3) result=miss
+16:24:06.702 enemy-shot: pos=(4,5) result=miss
+16:24:06.704 shot: pos=(3,4) result=sunk ship-size=2
+16:24:06.707 enemy-shot: pos=(3,4) result=miss
+16:24:06.709 shot: pos=(5,2) result=miss
+16:24:06.711 enemy-shot: pos=(2,5) result=miss
+16:24:06.714 shot: pos=(9,9) result=hit
+16:24:06.716 enemy-shot: pos=(2,3) result=miss
+16:24:06.719 shot: pos=(9,8) result=miss
+16:24:06.721 enemy-shot: pos=(9,8) result=miss
+16:24:06.723 shot: pos=(8,9) result=sunk ship-size=2
+16:24:06.726 game-over: result=win total-shots=48 enemy-total-shots=47
+16:24:06.726 enemy-ship: size=5 pos=(2,9) dir=horizontal
+16:24:06.726 enemy-ship: size=4 pos=(0,2) dir=vertical
+16:24:06.726 enemy-ship: size=4 pos=(5,0) dir=horizontal
+16:24:06.726 enemy-ship: size=3 pos=(9,1) dir=vertical
+16:24:06.726 enemy-ship: size=3 pos=(0,0) dir=horizontal
+16:24:06.726 enemy-ship: size=3 pos=(0,7) dir=vertical
+16:24:06.726 enemy-ship: size=2 pos=(3,3) dir=vertical
+16:24:06.726 enemy-ship: size=2 pos=(4,6) dir=vertical
+16:24:06.726 enemy-ship: size=2 pos=(7,7) dir=vertical
+16:24:06.726 enemy-ship: size=2 pos=(8,9) dir=horizontal
