@@ -5,6 +5,7 @@ import jd.mg.ships.tournament.api.Shot
 
 /** Something that happened in a game, reported in the order it happened. */
 sealed interface GameEvent {
+    /** The referee accepted a ship of the player. */
     data class ShipPlaced(
         val player: Player,
         val ship: ShipPlacement,
@@ -22,6 +23,7 @@ sealed interface GameEvent {
         val error: Exception?,
     ) : GameEvent
 
+    /** The last event of a game. */
     data class GameOver(
         val result: GameResult,
     ) : GameEvent

@@ -23,3 +23,6 @@ bin/
 
 # Kotlin
 .kotlin/
+
+# Logs of local games. The one in the repository was added on purpose.
+/ships-game-*.log

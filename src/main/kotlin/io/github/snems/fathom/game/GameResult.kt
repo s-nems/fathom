@@ -15,6 +15,7 @@ data class GameResult(
     /** Ships the player had accepted, in the order they were placed. */
     fun fleetOf(player: Player): List<ShipPlacement> = fleets.getValue(player)
 
+    /** Why the game was over. */
     enum class Ending {
         /** The winner sank the last ship of the loser. */
         FLEET_SUNK,
