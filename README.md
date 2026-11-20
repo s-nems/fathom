@@ -10,7 +10,7 @@ tournament.
 ```
 
 Plays one game between two instances of the bot and writes `ships-game-yyyyMMdd-HHmmss.log` to the working
-directory. The log follows player one. `ships-game-20261120-151401.log` in this repository is one such game.
+directory. The log follows player one. `ships-game-20261120-162406.log` in this repository is one such game.
 
 Gradle needs a JDK 17 or newer to start. The build uses JDK 25 and downloads it when the machine has none.
 
@@ -46,14 +46,23 @@ next to one. Ships of 2 cells go anywhere.
 
 ### Shooting
 
-For every cell the bot counts the placements of the ships still afloat that pass over it, each ship counted on
-its own, and shoots at the highest count. While a hit is open it counts only placements through a hit. The
-rules exclude:
+For each shot the bot draws up to 2000 random whole fleets that agree with every result so far and shoots at
+the cell that is a ship in the largest share of them. A whole fleet respects that ships keep each other apart.
+Counting each ship on its own, as the `density` shooter in the table below does, cannot.
+
+The rules exclude:
 
 - a ship on a cell that shares an edge with a sunk ship,
 - a ship next to an open hit that it does not cover, so two hits in a line fix the direction.
 
-This is the same method as the density shooter in the table below, and it scores the same.
+Fleets are drawn ship by ship, first through the open hits, then the remaining sizes. That does not produce
+every fleet equally often, so each fleet counts with a weight that undoes it (importance sampling).
+`FleetSamplerTest` compares the result with an exact sum over every fleet on five small positions.
+
+The weight also holds what the bot assumes about the opponent's placer. With an even chance the opponent placed
+ship after ship at random, which crowds the small ships into what is left, or picked any legal fleet alike.
+
+Sampling for one shot stops after 100 ms. If no drawn fleet fits, the bot counts placements per ship instead.
 
 ### Illegal moves
 
@@ -69,7 +78,7 @@ empty list, the bot answers with a last resort instead of throwing.
 ```
 
 Each shooter sinks the same 1000 fleets of each layout source. The table is the mean number of shots with seed
-1. The 95% intervals are between 0.16 and 0.41 shots. A lower number is better for a shooter, a higher one for
+1. The 95% intervals are between 0.15 and 0.41 shots. A lower number is better for a shooter, a higher one for
 a layout.
 
 | Shooter (name in the output) | Fleets placed ship by ship at random (`sequential`) | Fleets placed by the bot (`fathom`) |
@@ -79,14 +88,28 @@ a layout.
 | Same, hunting on one colour (`hunt-target-parity`) | 56.15 | 58.26 |
 | Placement density per ship (`density`) | 50.84 | 57.86 |
 | Density that knows how often each placement is used (`density-informed`) | 51.79 | 51.74 |
-| The bot (`fathom`) | 50.86 | 57.82 |
+| The bot (`fathom`) | 49.45 | 52.80 |
+| The bot, sure the opponent places ship by ship (`fathom-sequential`) | 48.90 | 55.85 |
+| The bot, any legal fleet alike (`fathom-any-fleet`) | 50.38 | 52.24 |
+| The bot without sampling (`fathom-no-sampling`) | 50.86 | 57.82 |
+
+The even chance between the two beliefs was picked on seed 2 from seven values. Across five layout sources it
+stays within 0.5 shots of the best value for each source. Certainty about ship-by-ship placing loses up to 3.7.
 
 The tool also prints the share of games the bot would win against an opponent that places fleets ship by ship
-at random and shoots like one of the shooters: 87.5% against `density`, 56.6% against `density-informed`.
+at random and shoots like one of the shooters: 93.7% against `density`, 67.8% against `density-informed`.
 
 The layout gains 7 shots against a density shooter and nothing against one that has learned the bot's habits.
 The other columns of the output hold the same measurement without the edge rule (`fathom-no-edge`) and without
 the choice among drafts (`fathom-first-draft`).
+
+```
+./gradlew arena --args="time"
+```
+
+Plays three games through the referee and prints the longest call of each kind. On an Apple M2 Pro the
+longest `chooseShot` took 23 ms. With `-Pinterpreted`, which turns the JIT compiler off, it took 161 ms. The
+limit is 500 ms.
 
 `src/arena/kotlin` holds the shooters and the layout sources.
 
