@@ -1,0 +1,20 @@
+league shooter on sequential
+sequential.eval.txt: 49.86 ± 0.07 shots over 10000 fleets
+shooter trained on sequential on sequential
+sequential.eval.txt: 49.13 ± 0.07 shots over 10000 fleets
+league shooter on fathom
+fathom.eval.txt: 51.31 ± 0.07 shots over 10000 fleets
+shooter trained on sequential on fathom
+fathom.eval.txt: 56.39 ± 0.06 shots over 10000 fleets
+league shooter on learned
+learned.eval.txt: 50.88 ± 0.06 shots over 10000 fleets
+shooter trained on sequential on learned
+learned.eval.txt: 52.47 ± 0.07 shots over 10000 fleets
+answer to fathom on fathom
+fathom.eval.txt: 46.95 ± 0.07 shots over 10000 fleets
+answer to learned on learned
+learned.eval.txt: 50.32 ± 0.07 shots over 10000 fleets
+duels: script (fathom shooter, fathom layouts) against a network player
+learned.eval.txt.shots wins 43.6% of games against fathom.league.shots
+learned.eval.txt.shots wins 14.6% of games against fathom.answer.shots
+learned.eval.txt.shots wins 82.8% of games against fathom.sequential-net.shots

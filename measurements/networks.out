@@ -1,0 +1,13 @@
+shooter trained on fleets placed ship by ship at random
+sequential.eval.txt: 49.13 ± 0.07 shots over 10000 fleets
+fathom.eval.txt: 56.39 ± 0.06 shots over 10000 fleets
+e0.8-d100.eval.txt: 57.38 ± 0.06 shots over 10000 fleets
+e1.0-d100.eval.txt: 57.90 ± 0.06 shots over 10000 fleets
+e0.8-d300.eval.txt: 57.93 ± 0.06 shots over 10000 fleets
+e1.0-d300.eval.txt: 58.37 ± 0.06 shots over 10000 fleets
+answer to fathom
+fathom.eval.txt: 46.95 ± 0.07 shots over 10000 fleets
+answer to e0.8-d100
+e0.8-d100.eval.txt: 44.98 ± 0.07 shots over 10000 fleets
+answer to e1.0-d100
+e1.0-d100.eval.txt: 43.74 ± 0.07 shots over 10000 fleets

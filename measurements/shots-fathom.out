@@ -1,0 +1,10 @@
+Mean shots to sink the fleet, 95% interval, 10000 fleets of fathom.eval.txt
+random                      97.74 ± 0.05
+hunt-target                 63.96 ± 0.13
+hunt-target-parity          58.25 ± 0.09
+density                     57.73 ± 0.08
+density-informed            51.75 ± 0.08
+fathom                      52.59 ± 0.06
+fathom-sequential           55.93 ± 0.06
+fathom-any-fleet            52.26 ± 0.06
+fathom-no-sampling          57.70 ± 0.08

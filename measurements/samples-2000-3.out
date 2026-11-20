@@ -1,0 +1,14 @@
+Mean shots to sink the fleet, 95% interval, 2000 games per cell, seed 3
+shooter \ layouts             sequential              fathom      fathom-no-edge
+density                     50.84 ± 0.18        57.54 ± 0.18        54.12 ± 0.16
+fathom                      49.35 ± 0.15        52.61 ± 0.14        51.74 ± 0.14
+samples-500                 49.58 ± 0.15        52.67 ± 0.14        51.74 ± 0.14
+samples-1000                49.59 ± 0.15        52.75 ± 0.14        51.76 ± 0.14
+samples-4000                49.46 ± 0.15        52.57 ± 0.14        51.70 ± 0.14
+samples-8000                49.32 ± 0.15        52.75 ± 0.14        51.82 ± 0.14
+Share of games fathom wins when the opponent places sequential fleets and shoots as
+density                            93.5%
+samples-500                        75.9%
+samples-1000                       76.6%
+samples-4000                       75.4%
+samples-8000                       76.5%

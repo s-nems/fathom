@@ -1,0 +1,10 @@
+Mean shots to sink the fleet, 95% interval, 2000 games per cell, seed 4
+shooter \ layouts        sequential         fathom       e1.0-d20      e0.8-d100      e1.0-d100      e0.8-d300      e1.0-d300     e0.8-d1000     e1.0-d1000
+hunt-target-parity     56.20 ± 0.20   58.15 ± 0.19   58.20 ± 0.19   58.19 ± 0.18   58.07 ± 0.19   58.06 ± 0.18   58.05 ± 0.19   58.08 ± 0.19   57.95 ± 0.19
+density                50.72 ± 0.18   57.89 ± 0.18   58.38 ± 0.18   58.82 ± 0.17   59.32 ± 0.17   59.33 ± 0.16   59.77 ± 0.16   59.85 ± 0.16   60.18 ± 0.16
+density-informed       51.81 ± 0.16   52.13 ± 0.17   52.10 ± 0.17   52.60 ± 0.18   52.22 ± 0.18   52.25 ± 0.18   51.97 ± 0.19   51.83 ± 0.19   51.27 ± 0.21
+fathom                 49.36 ± 0.15   52.67 ± 0.14   53.18 ± 0.14   53.59 ± 0.14   53.90 ± 0.13   53.93 ± 0.14   54.25 ± 0.13   54.45 ± 0.13   54.70 ± 0.13
+Share of games fathom wins when the opponent places sequential fleets and shoots as
+hunt-target-parity            93.9%
+density                       94.4%
+density-informed              71.0%

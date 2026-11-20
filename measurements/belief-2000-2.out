@@ -1,0 +1,28 @@
+Mean shots to sink the fleet, 95% interval, 2000 games per cell, seed 2
+shooter \ layouts             sequential            shuffled              fathom      fathom-no-edge  fathom-first-draft
+random                      97.76 ± 0.11        97.80 ± 0.11        97.81 ± 0.11        97.76 ± 0.11        97.78 ± 0.11
+hunt-target                 59.92 ± 0.26        60.54 ± 0.25        63.86 ± 0.29        61.47 ± 0.27        62.88 ± 0.27
+hunt-target-parity          56.28 ± 0.20        56.78 ± 0.20        58.21 ± 0.19        56.67 ± 0.19        58.05 ± 0.20
+density                     50.75 ± 0.17        51.73 ± 0.19        57.59 ± 0.18        54.12 ± 0.16        54.34 ± 0.21
+density-informed            51.81 ± 0.17        52.03 ± 0.17        51.81 ± 0.18        52.67 ± 0.18        50.73 ± 0.18
+fathom                      49.07 ± 0.15        49.73 ± 0.15        53.08 ± 0.14        52.10 ± 0.13        50.87 ± 0.16
+fathom-sequential           48.99 ± 0.15        49.92 ± 0.15        55.86 ± 0.14        52.28 ± 0.13        52.45 ± 0.16
+belief-0.9                  49.05 ± 0.15        49.87 ± 0.15        54.39 ± 0.14        52.11 ± 0.13        51.55 ± 0.15
+belief-0.5                  49.26 ± 0.15        49.87 ± 0.15        52.55 ± 0.14        51.90 ± 0.14        50.41 ± 0.15
+belief-0.3                  49.51 ± 0.15        50.04 ± 0.15        52.36 ± 0.14        51.72 ± 0.13        50.23 ± 0.15
+belief-0.1                  49.84 ± 0.15        50.15 ± 0.15        52.26 ± 0.14        51.58 ± 0.14        50.21 ± 0.15
+fathom-any-fleet            50.19 ± 0.15        50.34 ± 0.15        52.18 ± 0.14        51.40 ± 0.14        50.13 ± 0.15
+fathom-no-sampling          50.85 ± 0.18        51.77 ± 0.19        57.52 ± 0.18        54.18 ± 0.16        54.38 ± 0.20
+Share of games fathom wins when the opponent places sequential fleets and shoots as
+random                            100.0%
+hunt-target                        97.5%
+hunt-target-parity                 94.5%
+density                            94.2%
+density-informed                   70.7%
+fathom-sequential                  92.3%
+belief-0.9                         87.2%
+belief-0.5                         77.4%
+belief-0.3                         75.9%
+belief-0.1                         75.8%
+fathom-any-fleet                   74.8%
+fathom-no-sampling                 93.9%

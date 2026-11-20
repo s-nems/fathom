@@ -12,7 +12,9 @@ log, and a bot for a tournament run by someone else's engine.
 | One test class | `./gradlew test --tests '*FleetTest'` |
 | Play one game | `./gradlew run` |
 | Shots per shooter and layout | `./gradlew arena --args="1000 1"` |
-| Longest calls of the bot | `./gradlew arena --args="time"`, add `-Pinterpreted` for a cold JVM |
+| Longest calls of the bot | `./gradlew arena --args="time"`, add `-Pinterpreted` to turn the JIT compiler off |
+| Write fleets of a layout source | `./gradlew arena --args="layouts fathom 1000 1 fleets.txt"` |
+| Shoot at fleets from a file | `./gradlew arena --args="shots fleets.txt"` |
 
 Run the formatter and the build as two invocations.
 
@@ -24,15 +26,18 @@ Run the formatter and the build as two invocations.
 | `src/main/kotlin` | `game` (referee), `app` (one game and its log) |
 | `src/arena/kotlin` | Opponents and measurements, not part of the program |
 | `src/test/kotlin` | Tests |
+| `experiments/neural` | A neural shooter and placer in Python, with its own README. Not part of the build |
+| `measurements` | Outputs of the arena behind the numbers in the README |
 
 ## Rules of the code
 
 - `Bot.kt` stays byte for byte as provided.
 - `src/bot/kotlin` uses the Kotlin standard library only. It compiles at language level 2.1 against the JDK 17
   API, and the build fails on anything newer.
-- The bot never throws and never returns an illegal move. It keeps no state between games.
+- The bot never throws. It answers within the rules whenever its arguments allow that. It keeps no state
+  between games.
 - `Game` knows nothing about logs or wall-clock time. It reports events to an observer.
-- Randomness and time are passed in, so every test is deterministic.
+- Randomness and time are passed in, so every test is deterministic. Tests build the bot with `untimedBot`.
 - No literal with a meaning stays unnamed.
 - KDoc of one or two sentences on each type, saying what the signature cannot.
 
