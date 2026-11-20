@@ -35,6 +35,12 @@ sourceSets.main {
     runtimeClasspath += bot.output
 }
 
+// Opponents and measurements. Not part of the program.
+val arena: SourceSet by sourceSets.creating {
+    compileClasspath += bot.output + sourceSets.main.get().output
+    runtimeClasspath += bot.output + sourceSets.main.get().output
+}
+
 dependencies {
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
@@ -48,9 +54,11 @@ kotlin {
         allWarningsAsErrors = true
         extraWarnings = true
     }
-    // Tests see the bot, including what is internal to it.
-    target.compilations.named("test") {
-        associateWith(target.compilations.getByName("bot"))
+    // Tests and the arena see the bot, including what is internal to it.
+    listOf("test", arena.name).forEach { name ->
+        target.compilations.named(name) {
+            associateWith(target.compilations.getByName("bot"))
+        }
     }
 }
 
@@ -80,11 +88,31 @@ application {
     mainClass = "io.github.snems.fathom.app.MainKt"
 }
 
+// The arena has no tests of its own, so the build at least compiles it.
+tasks.check {
+    dependsOn(arena.classesTaskName)
+}
+
+tasks.register<JavaExec>("arena") {
+    description = "Measures shooters against layouts. Arguments: --args=\"<games> <seed>\""
+    group = "application"
+    classpath = arena.runtimeClasspath
+    mainClass = "io.github.snems.fathom.arena.ArenaKt"
+}
+
 tasks.test {
     useJUnitPlatform()
     testLogging {
         events(TestLogEvent.FAILED, TestLogEvent.SKIPPED)
         exceptionFormat = TestExceptionFormat.FULL
+    }
+}
+
+kover {
+    currentProject {
+        sources {
+            excludedSourceSets.add(arena.name)
+        }
     }
 }
 

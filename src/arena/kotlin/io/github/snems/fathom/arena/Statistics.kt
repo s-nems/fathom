@@ -1,0 +1,57 @@
+package io.github.snems.fathom.arena
+
+import java.util.Locale
+import kotlin.math.sqrt
+
+/** Mean of a sample with its 95% confidence interval. */
+class Estimate(
+    values: DoubleArray,
+) {
+    init {
+        require(values.size > 1) { "An interval needs at least two values" }
+    }
+
+    val mean: Double = values.average()
+    val deviation: Double = sqrt(values.sumOf { (it - mean) * (it - mean) } / (values.size - 1))
+
+    /** Half the width of the 95% confidence interval of the mean. */
+    val margin: Double = NORMAL_95 * deviation / sqrt(values.size.toDouble())
+
+    override fun toString(): String = "%.2f ± %.2f".format(Locale.ROOT, mean, margin)
+
+    private companion object {
+        const val NORMAL_95 = 1.96
+    }
+}
+
+fun IntArray.estimate() = Estimate(DoubleArray(size) { this[it].toDouble() })
+
+/** This sample minus the other, game by game. Both must come from the same fleets. */
+fun IntArray.differenceTo(other: IntArray): Estimate {
+    require(size == other.size) { "Paired samples have the same size" }
+    return Estimate(DoubleArray(size) { (this[it] - other[it]).toDouble() })
+}
+
+/**
+ * Chance that a game needing [mine] shots beats an independent game needing [theirs], when the lower count wins
+ * and an equal count is decided by a fair draw of who shoots first.
+ */
+fun winProbability(
+    mine: IntArray,
+    theirs: IntArray,
+): Double {
+    val theirCounts = theirs.asList().groupingBy { it }.eachCount()
+    val wins =
+        mine.sumOf { shots ->
+            theirCounts.entries.sumOf { (theirShots, games) ->
+                when {
+                    shots < theirShots -> games.toDouble()
+                    shots == theirShots -> games * DRAW_SHARE
+                    else -> 0.0
+                }
+            }
+        }
+    return wins / (mine.size.toDouble() * theirs.size)
+}
+
+private const val DRAW_SHARE = 0.5
