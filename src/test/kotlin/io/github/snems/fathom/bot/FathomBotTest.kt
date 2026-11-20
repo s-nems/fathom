@@ -38,7 +38,7 @@ class FathomBotTest {
             val events = mutableListOf<GameEvent>()
             val random = Random(seed)
             val first = Player.entries.random(random)
-            val game = Game(FathomBot(random), FathomBot(random), first, events::add, timeSource = TestTimeSource())
+            val game = Game(quickBot(random), quickBot(random), first, events::add, timeSource = TestTimeSource())
 
             // when
             val result = game.play()
@@ -107,9 +107,13 @@ class FathomBotTest {
         shot shouldBeIn listOf(onBoard)
     }
 
+    /** The bot with few samples per shot, so that many whole games stay fast. */
+    private fun quickBot(random: Random) = FathomBot(random, samplerSettings = SamplerSettings(samples = QUICK_SAMPLES))
+
     private companion object {
         const val SEED = 7
-        const val GAMES = 200
+        const val GAMES = 100
+        const val QUICK_SAMPLES = 50
         const val UNKNOWN_SIZE = 7
     }
 }

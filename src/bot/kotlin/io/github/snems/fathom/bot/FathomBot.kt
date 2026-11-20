@@ -7,18 +7,21 @@ import jd.mg.ships.tournament.api.Position
 import jd.mg.ships.tournament.api.ShipPlacement
 import jd.mg.ships.tournament.api.Shot
 import kotlin.random.Random
+import kotlin.time.TimeSource
 
 /**
  * The tournament bot. It lays its long ships along the edges, leaving as much open water as it can, and shoots
- * at the cell that the most placements of the ships afloat pass over. It keeps no state between games and
- * starts no threads.
+ * at the cell that is occupied most often in random fleets that agree with every shot so far. It keeps no state
+ * between games and starts no threads.
  *
  * An exception would forfeit the game. So when the referee passes something no rule allows, such as an empty
  * list, the bot answers with a last resort instead of throwing.
  */
 class FathomBot internal constructor(
     random: Random,
-    layoutPolicy: LayoutPolicy,
+    layoutPolicy: LayoutPolicy = LayoutPolicy(),
+    samplerSettings: SamplerSettings = SamplerSettings(),
+    timeSource: TimeSource = TimeSource.Monotonic,
 ) : Bot {
     constructor() : this(Random.Default)
 
@@ -27,7 +30,8 @@ class FathomBot internal constructor(
 
     private val planner = FleetPlanner(LayoutDrafts(random, layoutPolicy))
     private val waters = EnemyWaters()
-    private val picker = ShotPicker(waters, random)
+    private val picker =
+        ShotPicker(random, listOf(FleetSampler(waters, random, samplerSettings, timeSource), PlacementDensity(waters)))
 
     /** Shots the referee did not answer, so it must have refused them. */
     private val refused = mutableSetOf<Position>()

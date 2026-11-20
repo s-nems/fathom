@@ -5,7 +5,7 @@ import io.github.snems.fathom.board.Board
 import io.github.snems.fathom.board.cells
 import io.github.snems.fathom.board.edgeNeighbours
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
-import io.kotest.matchers.ints.shouldBeGreaterThan
+import io.kotest.matchers.doubles.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import jd.mg.ships.tournament.api.Direction.HORIZONTAL
 import jd.mg.ships.tournament.api.Position
@@ -17,15 +17,17 @@ import jd.mg.ships.tournament.api.ShotResult.MISS
 import jd.mg.ships.tournament.api.ShotResult.SUNK
 import org.junit.jupiter.api.Test
 import kotlin.random.Random
+import io.kotest.matchers.ints.shouldBeGreaterThan as shouldBeMoreThan
 
 class ShotWeightsTest {
     private val waters = EnemyWaters()
-    private val picker = ShotPicker(waters, Random(SEED))
+    private val density = PlacementDensity(waters)
+    private val picker = ShotPicker(Random(SEED), listOf(density))
 
     @Test
     fun shouldCountEveryPlacementOnAnEmptyBoard() {
         // when
-        val weights = picker.weights()
+        val weights = density.weights()
 
         // then
         weights[Position(0, 0).index()] shouldBe CORNER_PLACEMENTS
@@ -38,11 +40,11 @@ class ShotWeightsTest {
         record(Position(4, 4), MISS)
 
         // when
-        val weights = picker.weights()
+        val weights = density.weights()
 
         // then
-        weights[Position(4, 4).index()] shouldBe 0
-        weights[Position(4, 5).index()] shouldBeGreaterThan 0
+        weights[Position(4, 4).index()] shouldBe 0.0
+        weights[Position(4, 5).index()] shouldBeGreaterThan 0.0
     }
 
     @Test
@@ -53,18 +55,18 @@ class ShotWeightsTest {
         record(Position(5, 4), SUNK, sunk)
 
         // when
-        val weights = picker.weights()
+        val weights = density.weights()
 
         // then
-        (sunk.cells() + sunk.edgeNeighbours()).forEach { weights[it.index()] shouldBe 0 }
-        weights[Position(3, 3).index()] shouldBeGreaterThan 0
+        (sunk.cells() + sunk.edgeNeighbours()).forEach { weights[it.index()] shouldBe 0.0 }
+        weights[Position(3, 3).index()] shouldBeGreaterThan 0.0
     }
 
     @Test
     fun shouldStopCountingASizeOnceItsLastShipIsSunk() {
         // given
         val carrier = ship(5, 0, 0, HORIZONTAL)
-        val before = picker.weights()[FAR_CORNER.index()]
+        val before = density.weights()[FAR_CORNER.index()]
 
         // when
         carrier.cells().dropLast(1).forEach { record(it, HIT) }
@@ -72,7 +74,7 @@ class ShotWeightsTest {
 
         // then
         waters.afloat shouldBe listOf(4, 4, 3, 3, 3, 2, 2, 2, 2)
-        picker.weights()[FAR_CORNER.index()] shouldBe before - CARRIER_PLACEMENTS_IN_A_CORNER
+        density.weights()[FAR_CORNER.index()] shouldBe before - CARRIER_PLACEMENTS_IN_A_CORNER
     }
 
     @Test
@@ -81,7 +83,7 @@ class ShotWeightsTest {
         record(Position(4, 4), HIT)
 
         // when
-        val weights = picker.weights()
+        val weights = density.weights()
 
         // then
         positive(weights) shouldContainExactlyInAnyOrder
@@ -112,7 +114,7 @@ class ShotWeightsTest {
         record(Position(5, 4), HIT)
 
         // when
-        val weights = picker.weights()
+        val weights = density.weights()
 
         // then
         positive(weights) shouldContainExactlyInAnyOrder
@@ -127,11 +129,11 @@ class ShotWeightsTest {
         sunkWithoutShip.edgeNeighbours().forEach { record(it, MISS) }
 
         // when
-        val weights = picker.weights()
+        val weights = density.weights()
 
         // then
-        weights[sunkWithoutShip.index()] shouldBe 0
-        weights[FAR_CORNER.index()] shouldBeGreaterThan 0
+        weights[sunkWithoutShip.index()] shouldBe 0.0
+        weights[FAR_CORNER.index()] shouldBeGreaterThan 0.0
     }
 
     @Test
@@ -151,10 +153,13 @@ class ShotWeightsTest {
     @Test
     fun shouldBreakTiesAtRandom() {
         // when
-        val firstShots = List(PICKERS) { seed -> ShotPicker(EnemyWaters(), Random(seed)).pick(Board.positions) }
+        val firstShots =
+            List(PICKERS) { seed ->
+                ShotPicker(Random(seed), listOf(PlacementDensity(EnemyWaters()))).pick(Board.positions)
+            }
 
         // then
-        firstShots.distinct().size shouldBeGreaterThan 1
+        firstShots.distinct().size shouldBeMoreThan 1
     }
 
     private fun record(
@@ -163,7 +168,7 @@ class ShotWeightsTest {
         sunkShip: ShipPlacement? = null,
     ) = waters.record(Shot(position, result, sunkShip))
 
-    private fun positive(weights: IntArray): List<Position> = Board.positions.filter { weights[it.index()] > 0 }
+    private fun positive(weights: DoubleArray): List<Position> = Board.positions.filter { weights[it.index()] > 0 }
 
     private companion object {
         const val SEED = 7
@@ -171,9 +176,9 @@ class ShotWeightsTest {
         val FAR_CORNER = Position(9, 9)
 
         /** One horizontal and one vertical placement for each of the ten ships of the fleet. */
-        const val CORNER_PLACEMENTS = 20
+        const val CORNER_PLACEMENTS = 20.0
 
         /** One horizontal and one vertical placement of the 5-cell ship. */
-        const val CARRIER_PLACEMENTS_IN_A_CORNER = 2
+        const val CARRIER_PLACEMENTS_IN_A_CORNER = 2.0
     }
 }

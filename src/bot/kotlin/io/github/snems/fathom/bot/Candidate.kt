@@ -21,6 +21,18 @@ internal class Candidate(
     /** Cells that share an edge with the ship. */
     val neighbours: IntArray = ship.edgeNeighbours().map { it.index() }.toIntArray()
 
+    /** The ship's cells as bits: [cellsLow] holds cells 0 to 63, [cellsHigh] the rest. */
+    val cellsLow: Long = lowBits(cells)
+    val cellsHigh: Long = highBits(cells)
+
+    /** The cells no other ship may cover, as bits: the ship's cells and the cells sharing an edge with it. */
+    val claimLow: Long = cellsLow or lowBits(neighbours)
+    val claimHigh: Long = cellsHigh or highBits(neighbours)
+
+    /** Whether this ship and the other neither overlap nor share an edge. */
+    fun keepsClearOf(other: Candidate): Boolean =
+        (cellsLow and other.claimLow) == 0L && (cellsHigh and other.claimHigh) == 0L
+
     /** Cells that touch the ship at a corner only. Rarely needed, so worked out on first use. */
     val corners: IntArray by lazy {
         val diagonal =
@@ -29,6 +41,15 @@ internal class Candidate(
             }
         (diagonal.filter { it in Board }.map { it.index() }.toSet() - cells.toSet() - neighbours.toSet()).toIntArray()
     }
+
+    private fun lowBits(cells: IntArray): Long =
+        cells.filter { it < Long.SIZE_BITS }.fold(0L) { bits, cell ->
+            bits or
+                (1L shl cell)
+        }
+
+    private fun highBits(cells: IntArray): Long =
+        cells.filter { it >= Long.SIZE_BITS }.fold(0L) { bits, cell -> bits or (1L shl (cell - Long.SIZE_BITS)) }
 
     companion object {
         /** Every placement of every ship size of the fleet. */

@@ -4,38 +4,33 @@ import io.github.snems.fathom.board.Board
 import jd.mg.ships.tournament.api.Position
 import kotlin.random.Random
 
+/** Says how promising each cell is as the next shot. */
+internal fun interface ShotWeights {
+    /** Weight of every cell by its index. Only the order of the weights matters. */
+    fun weights(): DoubleArray
+}
+
 /**
- * Picks the next shot: the cell that the most placements of the ships afloat pass over, each ship counted on
- * its own. While a hit is open, only placements through a hit count, so the bot finishes the ship it has found.
+ * Picks the next shot: the heaviest offered cell by the first source of weights that has anything to say about
+ * the offered cells. Later sources are simpler and stand in when an earlier one comes back empty.
  */
 internal class ShotPicker(
-    private val waters: EnemyWaters,
     private val random: Random,
+    private val sources: List<ShotWeights>,
 ) {
-    /** The heaviest of the offered cells, at random among equals. Cells off the board are not considered. */
+    /**
+     * The heaviest of the offered cells, at random among equals. Cells off the board are not considered.
+     *
+     * @throws NoSuchElementException if no offered cell is on the board
+     */
     fun pick(offered: List<Position>): Position {
         val onBoard = offered.filter { it in Board }
-        val weights = weights()
-        val heaviest = onBoard.maxOf { weights[it.index()] }
-        return onBoard.filter { weights[it.index()] == heaviest }.random(random)
-    }
-
-    /** Weight of every cell by its index. A cell that is already hit weighs nothing. */
-    fun weights(): IntArray {
-        val throughHits = count(throughHitsOnly = waters.hasOpenHits)
-        // Results that fit no legal fleet can leave nothing through the hits. Then every placement counts.
-        return if (throughHits.any { it > 0 }) throughHits else count(throughHitsOnly = false)
-    }
-
-    private fun count(throughHitsOnly: Boolean): IntArray {
-        val weights = IntArray(CELL_COUNT)
-        for (size in waters.afloat) {
-            for (candidate in Candidate.BY_SIZE.getValue(size)) {
-                if (!waters.allows(candidate)) continue
-                if (throughHitsOnly && !waters.passesThroughHit(candidate)) continue
-                candidate.cells.forEach { if (!waters.isOpenHit(it)) weights[it]++ }
-            }
+        if (onBoard.isEmpty()) throw NoSuchElementException("No cell on the board among $offered")
+        for (source in sources) {
+            val weights = source.weights()
+            val heaviest = onBoard.maxOf { weights[it.index()] }
+            if (heaviest > 0.0) return onBoard.filter { weights[it.index()] == heaviest }.random(random)
         }
-        return weights
+        return onBoard.random(random)
     }
 }

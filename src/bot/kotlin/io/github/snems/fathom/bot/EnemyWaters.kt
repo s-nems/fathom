@@ -19,7 +19,14 @@ internal class EnemyWaters {
     var afloat: List<Int> = FLEET_SHIP_SIZES
         private set
 
+    /** Ships reported sunk, in the order they sank. */
+    var sunk: List<Candidate> = emptyList()
+        private set
+
     val hasOpenHits: Boolean get() = openHit.any { it }
+
+    /** Cells of the open hits, in board order. */
+    fun openHits(): IntArray = (0 until CELL_COUNT).filter { openHit[it] }.toIntArray()
 
     /** Takes in the result of a shot. A result for a cell off the board is ignored. */
     fun record(shot: Shot) {
@@ -36,13 +43,14 @@ internal class EnemyWaters {
     }
 
     private fun sink(ship: ShipPlacement) {
-        val sunk = Candidate.of(ship)
-        sunk.cells.forEach {
+        val candidate = Candidate.of(ship)
+        candidate.cells.forEach {
             closed[it] = true
             openHit[it] = false
         }
-        sunk.neighbours.forEach { closed[it] = true }
+        candidate.neighbours.forEach { closed[it] = true }
         afloat = afloat - ship.size
+        sunk = sunk + candidate
     }
 
     /**
