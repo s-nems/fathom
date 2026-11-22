@@ -5,7 +5,9 @@ import io.github.snems.fathom.board.cells
 import jd.mg.ships.tournament.api.Position
 import jd.mg.ships.tournament.api.ShipPlacement
 import jd.mg.ships.tournament.api.Shot
-import jd.mg.ships.tournament.api.ShotResult
+import jd.mg.ships.tournament.api.ShotResult.HIT
+import jd.mg.ships.tournament.api.ShotResult.MISS
+import jd.mg.ships.tournament.api.ShotResult.SUNK
 
 /**
  * A fleet being shot at. Remembers the shots it has received and answers each new one.
@@ -32,11 +34,11 @@ class FleetUnderFire(
     fun receive(position: Position): Shot {
         require(accepts(position)) { "Cannot shoot at $position" }
         shotAt += position
-        val ship = shipAt[position] ?: return Shot(position, ShotResult.MISS)
+        val ship = shipAt[position] ?: return Shot(position, MISS)
         return if (shotAt.containsAll(ship.cells())) {
-            Shot(position, ShotResult.SUNK, ship)
+            Shot(position, SUNK, ship)
         } else {
-            Shot(position, ShotResult.HIT)
+            Shot(position, HIT)
         }
     }
 }

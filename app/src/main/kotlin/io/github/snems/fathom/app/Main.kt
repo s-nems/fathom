@@ -4,7 +4,6 @@ import io.github.snems.fathom.bot.FathomBot
 import io.github.snems.fathom.bot.reporting.BotLog
 import io.github.snems.fathom.game.Game
 import io.github.snems.fathom.game.Player
-import java.lang.System.Logger.Level
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Clock
@@ -13,7 +12,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.random.Random
 
-private val log = System.getLogger("app")
+private val logger = System.getLogger("app")
 private val FILE_STAMP = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss", Locale.ROOT)
 
 internal fun logFileName(clock: Clock): String = "ships-game-${FILE_STAMP.format(LocalDateTime.now(clock))}.log"
@@ -34,5 +33,5 @@ fun main() {
     Files.newBufferedWriter(file).use { out ->
         Game(loggedBot(Player.ONE), loggedBot(Player.TWO), Player.entries.random(), GameLogWriter(out, clock)).play()
     }
-    log.log(Level.INFO, "Game log written to ${file.toAbsolutePath()}")
+    logger.info("Game log written to ${file.toAbsolutePath()}")
 }

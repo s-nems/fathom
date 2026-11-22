@@ -5,6 +5,9 @@ import io.github.snems.fathom.game.GameEvent.GameOver
 import io.github.snems.fathom.game.GameEvent.ShipPlaced
 import io.github.snems.fathom.game.GameEvent.ShotFired
 import io.github.snems.fathom.game.GameResult.Ending
+import io.github.snems.fathom.game.GameResult.Ending.FLEET_SUNK
+import io.github.snems.fathom.game.GameResult.Ending.ILLEGAL_MOVES
+import io.github.snems.fathom.game.GameResult.Ending.TIME_LIMIT
 import jd.mg.ships.tournament.api.Bot
 import jd.mg.ships.tournament.api.Shot
 import kotlin.time.Duration
@@ -67,8 +70,8 @@ class Game(
             seatOf(shooter).shotsFired++
             observer.on(ShotFired(shooter, shot))
             val toldInTime = tell(shooter, shot)
-            if (target.isSunk) return resultOf(shooter, Ending.FLEET_SUNK)
-            if (!toldInTime) throw Forfeit(shooter, Ending.TIME_LIMIT)
+            if (target.isSunk) return resultOf(shooter, FLEET_SUNK)
+            if (!toldInTime) throw Forfeit(shooter, TIME_LIMIT)
             shooter = shooter.opponent
         }
     }
@@ -92,11 +95,11 @@ class Game(
                         null
                     }
                 }
-            if (time > MOVE_TIME_LIMIT) throw Forfeit(player, Ending.TIME_LIMIT)
+            if (time > MOVE_TIME_LIMIT) throw Forfeit(player, TIME_LIMIT)
             if (answer != null && isLegal(answer)) return answer
             observer.on(BotFailed(player, error))
         }
-        throw Forfeit(player, Ending.ILLEGAL_MOVES)
+        throw Forfeit(player, ILLEGAL_MOVES)
     }
 
     /**

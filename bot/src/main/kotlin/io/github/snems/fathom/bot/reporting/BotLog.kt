@@ -8,7 +8,9 @@ import io.github.snems.fathom.bot.reporting.BotEvent.ShipRefused
 import io.github.snems.fathom.bot.reporting.BotEvent.ShotChosen
 import io.github.snems.fathom.bot.reporting.BotEvent.ShotRefused
 import java.lang.System.Logger
-import java.lang.System.Logger.Level
+import java.lang.System.Logger.Level.ERROR
+import java.lang.System.Logger.Level.INFO
+import java.lang.System.Logger.Level.WARNING
 
 /**
  * Writes the events of a bot to a logger: every move as INFO, a refused answer or a last resort as WARNING, a
@@ -20,13 +22,13 @@ class BotLog(
 ) : BotObserver {
     override fun on(event: BotEvent) {
         when (event) {
-            is ShipPlaced -> if (everyMove) logger.log(Level.INFO, "Placed ${event.ship}")
-            is ShotChosen -> if (everyMove) logger.log(Level.INFO, "Shot at ${event.shot}, weighed by ${event.source}")
-            is ShipRefused -> logger.log(Level.WARNING, "The referee refused ${event.ship}")
-            is ShotRefused -> logger.log(Level.WARNING, "The referee refused ${event.shot}")
-            is LastResortShip -> logger.log(Level.WARNING, "No answer within the rules, last resort ${event.ship}")
-            is LastResortShot -> logger.log(Level.WARNING, "No answer within the rules, last resort ${event.shot}")
-            is Failed -> logger.log(Level.ERROR, "The bot's own code failed", event.failure)
+            is ShipPlaced -> if (everyMove) logger.log(INFO, "Placed ${event.ship}")
+            is ShotChosen -> if (everyMove) logger.log(INFO, "Shot at ${event.shot}, weighed by ${event.source}")
+            is ShipRefused -> logger.log(WARNING, "The referee refused ${event.ship}")
+            is ShotRefused -> logger.log(WARNING, "The referee refused ${event.shot}")
+            is LastResortShip -> logger.log(WARNING, "No answer within the rules, last resort ${event.ship}")
+            is LastResortShot -> logger.log(WARNING, "No answer within the rules, last resort ${event.shot}")
+            is Failed -> logger.log(ERROR, "The bot's own code failed", event.failure)
         }
     }
 }

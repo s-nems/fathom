@@ -7,7 +7,8 @@ import io.github.snems.fathom.board.Board
 import io.github.snems.fathom.board.cells
 import io.github.snems.fathom.game.GameEvent.BotFailed
 import io.github.snems.fathom.game.GameEvent.ShotFired
-import io.github.snems.fathom.game.GameResult.Ending
+import io.github.snems.fathom.game.GameResult.Ending.FLEET_SUNK
+import io.github.snems.fathom.game.GameResult.Ending.ILLEGAL_MOVES
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
@@ -49,7 +50,7 @@ class IllegalMoveTest {
 
         // then
         result.winner shouldBe Player.TWO
-        result.ending shouldBe Ending.ILLEGAL_MOVES
+        result.ending shouldBe ILLEGAL_MOVES
         result.fleetOf(Player.ONE).shouldBeEmpty()
         events.filterIsInstance<ShotFired>().shouldBeEmpty()
     }
@@ -65,7 +66,7 @@ class IllegalMoveTest {
 
         // then
         result.winner shouldBe Player.ONE
-        result.ending shouldBe Ending.ILLEGAL_MOVES
+        result.ending shouldBe ILLEGAL_MOVES
         result.fleetOf(Player.ONE) shouldBe COMPLETE
         result.fleetOf(Player.TWO) shouldBe COMPLETE.take(2)
     }
@@ -82,7 +83,7 @@ class IllegalMoveTest {
 
         // then
         result.winner shouldBe Player.ONE
-        result.ending shouldBe Ending.FLEET_SUNK
+        result.ending shouldBe FLEET_SUNK
     }
 
     @Test
@@ -114,7 +115,7 @@ class IllegalMoveTest {
 
         // then
         result.winner shouldBe Player.TWO
-        result.ending shouldBe Ending.ILLEGAL_MOVES
+        result.ending shouldBe ILLEGAL_MOVES
         result.shotsBy(Player.ONE) shouldBe 1
         result.shotsBy(Player.TWO) shouldBe 1
     }
@@ -131,7 +132,7 @@ class IllegalMoveTest {
 
         // then
         result.winner shouldBe Player.ONE
-        result.ending shouldBe Ending.FLEET_SUNK
+        result.ending shouldBe FLEET_SUNK
         val failed = events.filterIsInstance<BotFailed>()
         failed shouldHaveSize 2
         failed.forEach { it.error.shouldBeInstanceOf<IllegalStateException>() }
@@ -148,7 +149,7 @@ class IllegalMoveTest {
 
         // then
         result.winner shouldBe Player.TWO
-        result.ending shouldBe Ending.ILLEGAL_MOVES
+        result.ending shouldBe ILLEGAL_MOVES
     }
 
     @Test
@@ -162,7 +163,7 @@ class IllegalMoveTest {
 
         // then
         result.winner shouldBe Player.ONE
-        result.ending shouldBe Ending.FLEET_SUNK
+        result.ending shouldBe FLEET_SUNK
         events.filterIsInstance<BotFailed>() shouldHaveSize everyShipCell.size
     }
 }

@@ -14,6 +14,9 @@ import jd.mg.ships.tournament.api.ShipPlacement
 import org.junit.jupiter.api.Test
 import java.lang.System.Logger
 import java.lang.System.Logger.Level
+import java.lang.System.Logger.Level.ERROR
+import java.lang.System.Logger.Level.INFO
+import java.lang.System.Logger.Level.WARNING
 import java.util.ResourceBundle
 
 class BotLogTest {
@@ -28,7 +31,7 @@ class BotLogTest {
         EVENTS.forEach(log::on)
 
         // then
-        logger.levels shouldBe listOf(Level.INFO, Level.INFO) + List(WARNINGS) { Level.WARNING } + Level.ERROR
+        logger.levels shouldBe listOf(INFO, INFO) + List(WARNINGS) { WARNING } + ERROR
     }
 
     @Test
@@ -40,7 +43,7 @@ class BotLogTest {
         EVENTS.forEach(log::on)
 
         // then
-        logger.levels shouldBe List(WARNINGS) { Level.WARNING } + Level.ERROR
+        logger.levels shouldBe List(WARNINGS) { WARNING } + ERROR
     }
 
     /**

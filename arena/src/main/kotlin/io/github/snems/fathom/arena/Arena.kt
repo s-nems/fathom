@@ -1,5 +1,6 @@
 package io.github.snems.fathom.arena
 
+import io.github.snems.fathom.app.info
 import io.github.snems.fathom.app.logToStandardOutput
 import io.github.snems.fathom.arena.layouts.FileLayouts
 import io.github.snems.fathom.arena.layouts.LayoutFile
@@ -7,12 +8,11 @@ import io.github.snems.fathom.arena.layouts.LayoutKind
 import io.github.snems.fathom.arena.layouts.draw
 import io.github.snems.fathom.arena.shooters.ShooterKind
 import io.github.snems.fathom.bot.FathomBot
-import java.lang.System.Logger.Level
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.Locale
 
-private val log = System.getLogger("arena")
+private val logger = System.getLogger("arena")
 private const val DEFAULT_GAMES = 1_000
 private const val DEFAULT_SEED = 1L
 private const val DEFAULT_TIMED_GAMES = 3
@@ -68,10 +68,10 @@ fun main(args: Array<String>) {
 private fun printShotsAt(file: Path) {
     val fleets = LayoutFile.read(file)
     val range = ShootingRange(fleets.map(ShootingRange::fleetOf), DEFAULT_SEED)
-    log.log(Level.INFO, "Mean shots to sink the fleet, 95% interval, ${fleets.size} fleets of $file")
+    logger.info("Mean shots to sink the fleet, 95% interval, ${fleets.size} fleets of $file")
     ShooterKind.entries.forEach { shooter ->
         val shots = range.shotsToSink(shooter.against(FileLayouts(fleets), DEFAULT_SEED))
-        log.log(Level.INFO, row(shooter.label, listOf(shots.estimate().formatted())))
+        logger.info(row(shooter.label, listOf(shots.estimate().formatted())))
         if (shooter == ShooterKind.FATHOM) Files.write(Path.of("$file$SHOTS_SUFFIX"), shots.map(Int::toString))
     }
 }
@@ -91,23 +91,22 @@ private fun printShotTable(
             layouts.associateWith { ranges.getValue(it).shotsToSink(shooter.against(it.source, seed)) }
         }
 
-    log.log(Level.INFO, "Mean shots to sink the fleet, 95% interval, $games games per cell, seed $seed")
-    log.log(Level.INFO, row("shooter \\ layouts", layouts.map { it.label }))
+    logger.info("Mean shots to sink the fleet, 95% interval, $games games per cell, seed $seed")
+    logger.info(row("shooter \\ layouts", layouts.map { it.label }))
     shots.forEach { (shooter, byLayout) ->
-        log.log(Level.INFO, row(shooter.label, byLayout.values.map { it.estimate().formatted() }))
+        logger.info(row(shooter.label, byLayout.values.map { it.estimate().formatted() }))
     }
 
     val bot = ShooterKind.FATHOM
     val opponentLayouts = LayoutKind.SEQUENTIAL
-    log.log(Level.INFO, "")
-    log.log(
-        Level.INFO,
+    logger.info("")
+    logger.info(
         "Share of games ${bot.label} wins when the opponent places ${opponentLayouts.label} fleets and shoots as",
     )
     val own = shots.getValue(bot).getValue(opponentLayouts)
     (shots - bot).forEach { (shooter, byLayout) ->
         val share = winProbability(mine = own, theirs = byLayout.getValue(LayoutKind.FATHOM))
-        log.log(Level.INFO, row(shooter.label, listOf("%.1f%%".format(Locale.ROOT, share * PERCENT))))
+        logger.info(row(shooter.label, listOf("%.1f%%".format(Locale.ROOT, share * PERCENT))))
     }
 }
 

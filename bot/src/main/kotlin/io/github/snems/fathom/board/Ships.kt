@@ -1,6 +1,7 @@
 package io.github.snems.fathom.board
 
-import jd.mg.ships.tournament.api.Direction
+import jd.mg.ships.tournament.api.Direction.HORIZONTAL
+import jd.mg.ships.tournament.api.Direction.VERTICAL
 import jd.mg.ships.tournament.api.Position
 import jd.mg.ships.tournament.api.ShipPlacement
 
@@ -9,8 +10,8 @@ val FLEET_SHIP_SIZES: List<Int> = listOf(5, 4, 4, 3, 3, 3, 2, 2, 2, 2)
 fun ShipPlacement.cells(): List<Position> =
     (0..<size).map { step ->
         when (direction) {
-            Direction.HORIZONTAL -> Position(position.x + step, position.y)
-            Direction.VERTICAL -> Position(position.x, position.y + step)
+            HORIZONTAL -> Position(position.x + step, position.y)
+            VERTICAL -> Position(position.x, position.y + step)
         }
     }
 

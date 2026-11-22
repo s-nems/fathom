@@ -1,7 +1,8 @@
 package io.github.snems.fathom.arena.shooters
 
 import io.github.snems.fathom.bot.FathomBot
-import io.github.snems.fathom.bot.reporting.BotEvent
+import io.github.snems.fathom.bot.reporting.BotEvent.Failed
+import io.github.snems.fathom.bot.reporting.BotEvent.ShotChosen
 import io.github.snems.fathom.bot.shooting.SamplerSettings
 import jd.mg.ships.tournament.api.Position
 import jd.mg.ships.tournament.api.Shot
@@ -24,8 +25,8 @@ class FathomShooter(
             timeBudget = Duration.INFINITE,
             observer = { event ->
                 when (event) {
-                    is BotEvent.ShotChosen -> weights = event.weights
-                    is BotEvent.Failed -> throw event.failure
+                    is ShotChosen -> weights = event.weights
+                    is Failed -> throw event.failure
                     else -> Unit
                 }
             },

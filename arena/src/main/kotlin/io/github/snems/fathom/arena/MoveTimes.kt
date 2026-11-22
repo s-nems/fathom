@@ -1,19 +1,19 @@
 package io.github.snems.fathom.arena
 
+import io.github.snems.fathom.app.info
 import io.github.snems.fathom.game.Game
 import io.github.snems.fathom.game.Player
 import jd.mg.ships.tournament.api.Bot
 import jd.mg.ships.tournament.api.Position
 import jd.mg.ships.tournament.api.ShipPlacement
 import jd.mg.ships.tournament.api.Shot
-import java.lang.System.Logger.Level
 import java.util.Locale
 import kotlin.random.Random
 import kotlin.time.Duration
-import kotlin.time.DurationUnit
+import kotlin.time.DurationUnit.MILLISECONDS
 import kotlin.time.measureTimedValue
 
-private val log = System.getLogger("arena")
+private val logger = System.getLogger("arena")
 private const val COLUMN = 16
 
 /**
@@ -25,9 +25,8 @@ fun printMoveTimes(
     games: Int,
     seed: Long,
 ) {
-    log.log(Level.INFO, "Longest call in milliseconds, game by game. The referee allows ${Game.MOVE_TIME_LIMIT}.")
-    log.log(
-        Level.INFO,
+    logger.info("Longest call in milliseconds, game by game. The referee allows ${Game.MOVE_TIME_LIMIT}.")
+    logger.info(
         "game".padEnd(COLUMN) + Call.entries.joinToString("") { it.heading.padStart(COLUMN) } +
             "ending".padStart(COLUMN),
     )
@@ -37,10 +36,9 @@ fun printMoveTimes(
         val result = Game(TimedBot(bot(random), longest), TimedBot(bot(random), longest), Player.ONE).play()
         val cells =
             Call.entries.map {
-                "%.1f".format(Locale.ROOT, longest.getValue(it).toDouble(DurationUnit.MILLISECONDS))
+                "%.1f".format(Locale.ROOT, longest.getValue(it).toDouble(MILLISECONDS))
             }
-        log.log(
-            Level.INFO,
+        logger.info(
             "${game + 1}".padEnd(COLUMN) + cells.joinToString("") { it.padStart(COLUMN) } +
                 "${result.ending}".padStart(COLUMN),
         )

@@ -14,7 +14,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.doubles.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.shouldBe
-import jd.mg.ships.tournament.api.Direction
+import jd.mg.ships.tournament.api.Direction.HORIZONTAL
 import jd.mg.ships.tournament.api.ShipPlacement
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -243,7 +243,7 @@ class PlacingFleetTest {
         fleets(policy).map { Board.positions.size - it.claimedCells().size }.average()
 
     private fun isAlongEdge(ship: ShipPlacement): Boolean {
-        val line = if (ship.direction == Direction.HORIZONTAL) ship.position.y else ship.position.x
+        val line = if (ship.direction == HORIZONTAL) ship.position.y else ship.position.x
         return line == 0 || line == Board.SIZE - 1
     }
 

@@ -6,7 +6,7 @@ import io.github.snems.fathom.game.GameEvent.GameOver
 import io.github.snems.fathom.game.GameEvent.ShipPlaced
 import io.github.snems.fathom.game.GameEvent.ShotFired
 import io.github.snems.fathom.game.GameResult
-import io.github.snems.fathom.game.GameResult.Ending
+import io.github.snems.fathom.game.GameResult.Ending.FLEET_SUNK
 import io.github.snems.fathom.game.Player
 import io.kotest.matchers.shouldBe
 import jd.mg.ships.tournament.api.Direction.HORIZONTAL
@@ -108,7 +108,7 @@ class GameLogWriterTest {
     private fun resultWonBy(winner: Player) =
         GameResult(
             winner = winner,
-            ending = Ending.FLEET_SUNK,
+            ending = FLEET_SUNK,
             shots = mapOf(Player.ONE to OWN_SHOTS, Player.TWO to ENEMY_SHOTS),
             fleets = mapOf(Player.ONE to listOf(ownShip), Player.TWO to listOf(enemyShip)),
         )

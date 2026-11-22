@@ -5,7 +5,9 @@ import io.github.snems.fathom.board.cells
 import io.github.snems.fathom.board.edgeNeighbours
 import jd.mg.ships.tournament.api.Position
 import jd.mg.ships.tournament.api.Shot
-import jd.mg.ships.tournament.api.ShotResult
+import jd.mg.ships.tournament.api.ShotResult.HIT
+import jd.mg.ships.tournament.api.ShotResult.MISS
+import jd.mg.ships.tournament.api.ShotResult.SUNK
 
 /**
  * What a baseline shooter has learned from the results of its shots.
@@ -29,15 +31,15 @@ internal class Sightings {
 
     fun record(shot: Shot) {
         when (shot.result) {
-            ShotResult.MISS -> {
+            MISS -> {
                 closedCells += shot.position
             }
 
-            ShotResult.HIT -> {
+            HIT -> {
                 hits += shot.position
             }
 
-            ShotResult.SUNK -> {
+            SUNK -> {
                 val ship = checkNotNull(shot.sunkShip)
                 hits -= ship.cells().toSet()
                 closedCells += ship.cells()

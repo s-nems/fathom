@@ -38,6 +38,9 @@ Run the formatter and the build as two invocations.
 - `Game` knows nothing about logs or wall-clock time. It reports events to an observer.
 - Randomness and time are passed in, so every test is deterministic. Tests build the bot with `untimedBot`.
 - No literal with a meaning stays unnamed.
+- Enum constants and nested types are imported: `INFO`, not `Level.INFO`. `Player.ONE` and `Player.TWO` keep
+  their type, because the bare word says too little.
+- A system logger is a `logger`. `logger.info(...)` from `app` logs at INFO.
 - KDoc of one or two sentences on each type, saying what the signature cannot.
 
 ## Tests

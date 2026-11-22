@@ -3,7 +3,8 @@ package io.github.snems.fathom.game
 import io.github.snems.fathom.SampleFleets.COMPLETE
 import io.github.snems.fathom.ScriptedBot
 import io.github.snems.fathom.board.cells
-import io.github.snems.fathom.game.GameResult.Ending
+import io.github.snems.fathom.game.GameResult.Ending.FLEET_SUNK
+import io.github.snems.fathom.game.GameResult.Ending.TIME_LIMIT
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
@@ -27,7 +28,7 @@ class TimeLimitTest {
 
         // then
         result.winner shouldBe Player.TWO
-        result.ending shouldBe Ending.TIME_LIMIT
+        result.ending shouldBe TIME_LIMIT
         result.fleetOf(Player.ONE).shouldBeEmpty()
     }
 
@@ -42,7 +43,7 @@ class TimeLimitTest {
 
         // then
         result.winner shouldBe Player.ONE
-        result.ending shouldBe Ending.FLEET_SUNK
+        result.ending shouldBe FLEET_SUNK
     }
 
     @Test
@@ -56,7 +57,7 @@ class TimeLimitTest {
 
         // then
         result.winner shouldBe Player.TWO
-        result.ending shouldBe Ending.TIME_LIMIT
+        result.ending shouldBe TIME_LIMIT
         result.shotsBy(Player.ONE) shouldBe 1
         result.shotsBy(Player.TWO) shouldBe 0
     }
@@ -74,6 +75,6 @@ class TimeLimitTest {
 
         // then
         result.winner shouldBe Player.ONE
-        result.ending shouldBe Ending.FLEET_SUNK
+        result.ending shouldBe FLEET_SUNK
     }
 }

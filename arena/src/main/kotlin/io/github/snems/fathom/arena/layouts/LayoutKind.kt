@@ -3,7 +3,7 @@ package io.github.snems.fathom.arena.layouts
 import io.github.snems.fathom.arena.labelOf
 import io.github.snems.fathom.bot.FathomBot
 import io.github.snems.fathom.bot.placing.LayoutPolicy
-import io.github.snems.fathom.bot.reporting.BotEvent
+import io.github.snems.fathom.bot.reporting.BotEvent.Failed
 import kotlin.random.Random
 import kotlin.time.Duration
 
@@ -41,5 +41,5 @@ private fun untimedBot(
     random: Random,
     layout: LayoutPolicy = LayoutPolicy(),
 ) = FathomBot(random, layout, timeBudget = Duration.INFINITE, observer = {
-    if (it is BotEvent.Failed) throw it.failure
+    if (it is Failed) throw it.failure
 })

@@ -26,7 +26,7 @@ import kotlin.random.Random
 import kotlin.time.AbstractLongTimeSource
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.DurationUnit
+import kotlin.time.DurationUnit.MILLISECONDS
 import kotlin.time.TimeSource
 
 /**
@@ -167,7 +167,7 @@ class FleetSamplerTest {
     /**
      * A clock that moves on by a millisecond each time it is read.
      */
-    private class TickingTimeSource : AbstractLongTimeSource(DurationUnit.MILLISECONDS) {
+    private class TickingTimeSource : AbstractLongTimeSource(MILLISECONDS) {
         private var now = 0L
 
         override fun read(): Long = now++

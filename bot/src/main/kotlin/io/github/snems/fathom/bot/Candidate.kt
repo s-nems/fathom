@@ -6,7 +6,8 @@ import io.github.snems.fathom.board.cells
 import io.github.snems.fathom.board.cornerNeighbours
 import io.github.snems.fathom.board.edgeNeighbours
 import io.github.snems.fathom.board.isOnBoard
-import jd.mg.ships.tournament.api.Direction
+import jd.mg.ships.tournament.api.Direction.HORIZONTAL
+import jd.mg.ships.tournament.api.Direction.VERTICAL
 import jd.mg.ships.tournament.api.Position
 import jd.mg.ships.tournament.api.ShipPlacement
 
@@ -43,8 +44,8 @@ internal class Candidate private constructor(
      */
     private val line: Int =
         when (ship.direction) {
-            Direction.HORIZONTAL -> ship.position.y
-            Direction.VERTICAL -> ship.position.x
+            HORIZONTAL -> ship.position.y
+            VERTICAL -> ship.position.x
         }
 
     /**

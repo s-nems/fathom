@@ -8,7 +8,8 @@ import io.github.snems.fathom.bot.Candidate
 import io.github.snems.fathom.bot.index
 import jd.mg.ships.tournament.api.ShipPlacement
 import jd.mg.ships.tournament.api.Shot
-import jd.mg.ships.tournament.api.ShotResult
+import jd.mg.ships.tournament.api.ShotResult.MISS
+import jd.mg.ships.tournament.api.ShotResult.SUNK
 
 /**
  * What the results of the bot's shots say about the fleet it is shooting at.
@@ -42,9 +43,9 @@ internal class EnemyWaters {
      */
     fun record(shot: Shot) {
         if (shot.position !in Board) return
-        val sunkShip = shot.sunkShip?.takeIf { shot.result == ShotResult.SUNK && it.isOnBoard() }
+        val sunkShip = shot.sunkShip?.takeIf { shot.result == SUNK && it.isOnBoard() }
         when {
-            shot.result == ShotResult.MISS -> closed[shot.position.index()] = true
+            shot.result == MISS -> closed[shot.position.index()] = true
 
             sunkShip != null -> sink(sunkShip)
 

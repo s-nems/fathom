@@ -10,7 +10,9 @@ import io.github.snems.fathom.game.Player
 import jd.mg.ships.tournament.api.Position
 import jd.mg.ships.tournament.api.ShipPlacement
 import jd.mg.ships.tournament.api.Shot
-import jd.mg.ships.tournament.api.ShotResult
+import jd.mg.ships.tournament.api.ShotResult.HIT
+import jd.mg.ships.tournament.api.ShotResult.MISS
+import jd.mg.ships.tournament.api.ShotResult.SUNK
 import java.time.Clock
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -55,9 +57,9 @@ internal class GameLogWriter(
     private fun describe(shot: Shot): String {
         val result =
             when (shot.result) {
-                ShotResult.MISS -> "miss"
-                ShotResult.HIT -> "hit"
-                ShotResult.SUNK -> "sunk ship-size=${checkNotNull(shot.sunkShip).size}"
+                MISS -> "miss"
+                HIT -> "hit"
+                SUNK -> "sunk ship-size=${checkNotNull(shot.sunkShip).size}"
             }
         return "${describe(shot.position)} result=$result"
     }

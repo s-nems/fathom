@@ -9,7 +9,7 @@ import io.github.snems.fathom.board.cells
 import io.github.snems.fathom.game.GameEvent.GameOver
 import io.github.snems.fathom.game.GameEvent.ShipPlaced
 import io.github.snems.fathom.game.GameEvent.ShotFired
-import io.github.snems.fathom.game.GameResult.Ending
+import io.github.snems.fathom.game.GameResult.Ending.FLEET_SUNK
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
@@ -74,7 +74,7 @@ class PlayingGameTest {
 
         // then
         result.winner shouldBe Player.ONE
-        result.ending shouldBe Ending.FLEET_SUNK
+        result.ending shouldBe FLEET_SUNK
         result.shotsBy(Player.ONE) shouldBe SHIP_CELLS
         result.shotsBy(Player.TWO) shouldBe SHIP_CELLS - 1
         result.fleetOf(Player.ONE) shouldBe COMPLETE

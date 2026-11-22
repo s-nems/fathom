@@ -2,6 +2,8 @@ package io.github.snems.fathom.arena.shooters
 
 import io.github.snems.fathom.board.edgeNeighbours
 import jd.mg.ships.tournament.api.Direction
+import jd.mg.ships.tournament.api.Direction.HORIZONTAL
+import jd.mg.ships.tournament.api.Direction.VERTICAL
 import jd.mg.ships.tournament.api.Position
 import jd.mg.ships.tournament.api.Shot
 import kotlin.random.Random
@@ -25,8 +27,8 @@ class HuntTargetShooter(
 
     private fun targets(open: List<Position>): List<Position> {
         val hit = sightings.openHits.firstOrNull() ?: return emptyList()
-        val row = lineOfHits(hit, Direction.HORIZONTAL)
-        val column = lineOfHits(hit, Direction.VERTICAL)
+        val row = lineOfHits(hit, HORIZONTAL)
+        val column = lineOfHits(hit, VERTICAL)
         val ends =
             when {
                 row.hits > 1 -> row.ends
@@ -67,8 +69,8 @@ class HuntTargetShooter(
         step: Int,
     ): Position =
         when (direction) {
-            Direction.HORIZONTAL -> Position(x + step, y)
-            Direction.VERTICAL -> Position(x, y + step)
+            HORIZONTAL -> Position(x + step, y)
+            VERTICAL -> Position(x, y + step)
         }
 
     private fun hunt(open: List<Position>): List<Position> =

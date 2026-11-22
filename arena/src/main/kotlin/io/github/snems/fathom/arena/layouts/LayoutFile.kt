@@ -1,6 +1,7 @@
 package io.github.snems.fathom.arena.layouts
 
-import jd.mg.ships.tournament.api.Direction
+import jd.mg.ships.tournament.api.Direction.HORIZONTAL
+import jd.mg.ships.tournament.api.Direction.VERTICAL
 import jd.mg.ships.tournament.api.Position
 import jd.mg.ships.tournament.api.ShipPlacement
 import java.nio.file.Files
@@ -38,6 +39,6 @@ object LayoutFile {
      * Characters of a ship: its size, its letter, x and y.
      */
     private const val SHIP_LENGTH = 4
-    private val LETTERS = mapOf(Direction.HORIZONTAL to 'h', Direction.VERTICAL to 'v')
+    private val LETTERS = mapOf(HORIZONTAL to 'h', VERTICAL to 'v')
     private val DIRECTIONS = LETTERS.entries.associate { (direction, letter) -> letter to direction }
 }

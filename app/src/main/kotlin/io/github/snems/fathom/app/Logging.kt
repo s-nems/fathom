@@ -1,5 +1,7 @@
 package io.github.snems.fathom.app
 
+import java.lang.System.Logger
+import java.lang.System.Logger.Level.INFO
 import java.util.logging.LogManager
 import java.util.logging.LogRecord
 import java.util.logging.SimpleFormatter
@@ -22,6 +24,11 @@ fun logToStandardOutput() {
     root.handlers.forEach(root::removeHandler)
     root.addHandler(FlushingHandler())
 }
+
+/**
+ * Logs a message at the level most of what a program says has.
+ */
+fun Logger.info(message: String) = log(INFO, message)
 
 /**
  * Writes each entry out as soon as it is logged, where a plain stream handler would wait for its buffer to fill.
