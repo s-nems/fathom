@@ -35,14 +35,12 @@ sourceSets.main {
     runtimeClasspath += bot.output
 }
 
-// Opponents and measurements. Not part of the program.
 val arena: SourceSet =
     sourceSets.create("arena") {
         compileClasspath += bot.output + sourceSets.main.get().output
         runtimeClasspath += bot.output + sourceSets.main.get().output
     }
 
-// The statistics behind the published numbers are tested like the rest.
 sourceSets.test {
     compileClasspath += arena.output
     runtimeClasspath += arena.output
@@ -61,7 +59,6 @@ kotlin {
         allWarningsAsErrors = true
         extraWarnings = true
     }
-    // Tests and the arena see the bot, including what is internal to it.
     listOf("test", arena.name).forEach { name ->
         target.compilations.named(name) {
             associateWith(target.compilations.getByName("bot"))
@@ -86,7 +83,6 @@ tasks.named<JavaCompile>(bot.compileJavaTaskName) {
     options.release = botJavaVersion
 }
 
-// The program ships as one jar, so the bot goes into it.
 tasks.jar {
     from(bot.output)
 }
@@ -95,7 +91,6 @@ application {
     mainClass = "io.github.snems.fathom.app.MainKt"
 }
 
-// The arena has no tests of its own, so the build at least compiles it.
 tasks.check {
     dependsOn(arena.classesTaskName, "koverHtmlReport")
 }
@@ -105,7 +100,6 @@ tasks.register<JavaExec>("arena") {
     group = "application"
     classpath = arena.runtimeClasspath
     mainClass = "io.github.snems.fathom.arena.ArenaKt"
-    // -Pinterpreted turns the JIT compiler off, the slowest a JVM runs this code.
     if (providers.gradleProperty("interpreted").isPresent) jvmArgs("-Xint")
 }
 
