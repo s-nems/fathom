@@ -57,6 +57,6 @@ sealed interface BotEvent {
      * The bot's own code threw. Where an answer was due, a last resort follows.
      */
     data class Failed(
-        val failure: Exception,
+        val failure: Throwable,
     ) : BotEvent
 }

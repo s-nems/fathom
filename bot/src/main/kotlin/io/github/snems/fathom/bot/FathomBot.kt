@@ -1,5 +1,6 @@
 package io.github.snems.fathom.bot
 
+import io.github.snems.fathom.board.Board
 import io.github.snems.fathom.board.FLEET_SHIP_SIZES
 import io.github.snems.fathom.bot.placing.FleetPlanner
 import io.github.snems.fathom.bot.placing.LayoutDrafts
@@ -11,7 +12,6 @@ import io.github.snems.fathom.bot.reporting.BotEvent.ShipPlaced
 import io.github.snems.fathom.bot.reporting.BotEvent.ShipRefused
 import io.github.snems.fathom.bot.reporting.BotEvent.ShotChosen
 import io.github.snems.fathom.bot.reporting.BotEvent.ShotRefused
-import io.github.snems.fathom.bot.reporting.BotLog
 import io.github.snems.fathom.bot.reporting.BotObserver
 import io.github.snems.fathom.bot.shooting.EnemyWaters
 import io.github.snems.fathom.bot.shooting.FleetSampler
@@ -20,7 +20,7 @@ import io.github.snems.fathom.bot.shooting.SamplerSettings
 import io.github.snems.fathom.bot.shooting.ShotPicker
 import io.github.snems.fathom.bot.shooting.ShotWeights
 import jd.mg.ships.tournament.api.Bot
-import jd.mg.ships.tournament.api.Direction
+import jd.mg.ships.tournament.api.Direction.HORIZONTAL
 import jd.mg.ships.tournament.api.Position
 import jd.mg.ships.tournament.api.ShipPlacement
 import jd.mg.ships.tournament.api.Shot
@@ -36,8 +36,8 @@ import kotlin.time.TimeSource
  *
  * A call that throws counts as an illegal move. So when the referee passes something no rule allows, such as an
  * empty list, or the bot's own code fails, the bot answers with a last resort. The [BotObserver] is told of
- * every answer, refusal, last resort and failure. Unless one is given, the warnings and errors go to the system
- * logger and the moves are not logged, so that a tournament is not flooded.
+ * every answer, refusal, last resort and failure. Unless one is given, the bot reports nothing, so that it stays
+ * silent in someone else's engine.
  */
 class FathomBot(
     random: Random,
@@ -45,7 +45,7 @@ class FathomBot(
     samplerSettings: SamplerSettings = SamplerSettings(),
     timeBudget: Duration = TIME_BUDGET,
     timeSource: TimeSource = TimeSource.Monotonic,
-    private val observer: BotObserver = BotLog(System.getLogger(LOGGER_NAME), everyMove = false),
+    private val observer: BotObserver = BotObserver { },
 ) : Bot {
     constructor() : this(Random.Default)
 
@@ -81,9 +81,10 @@ class FathomBot(
             refusedShots += answered
             observer.on(ShotRefused(answered))
         }
-        val offered = availablePositions.filter { it !in refusedShots }.ifEmpty { availablePositions }
+        val onBoard = availablePositions.filter { it in Board }
+        val offered = onBoard.filter { it !in refusedShots }.ifEmpty { onBoard }
         val pick = attempt { picker.pick(offered) }
-        val shot = pick?.shot ?: availablePositions.firstOrNull() ?: TOP_LEFT
+        val shot = pick?.shot ?: offered.firstOrNull() ?: availablePositions.firstOrNull() ?: TOP_LEFT
         observer.on(if (pick == null) LastResortShot(shot) else ShotChosen(shot, nameOf(pick.source), pick.weights))
         lastShot = shot
         return shot
@@ -94,22 +95,22 @@ class FathomBot(
     }
 
     /**
-     * What the block finds, or null when it finds nothing or fails. A failure goes to the observer.
+     * What the block finds, or null when it finds nothing or fails. A failure goes to the observer. Errors are
+     * caught too, because one that leaves the bot loses the game.
      */
     private inline fun <T : Any> attempt(block: () -> T?): T? =
         try {
             block()
-        } catch (failure: Exception) {
+        } catch (failure: Throwable) {
             observer.on(Failed(failure))
             null
         }
 
-    private fun lastResort(size: Int) = ShipPlacement(size, TOP_LEFT, Direction.HORIZONTAL)
+    private fun lastResort(size: Int) = ShipPlacement(size, TOP_LEFT, HORIZONTAL)
 
     private fun nameOf(source: ShotWeights?): String = source?.let { it::class.simpleName } ?: NO_SOURCE
 
     private companion object {
-        const val LOGGER_NAME = "fathom"
         const val NO_SOURCE = "random"
         val TOP_LEFT = Position(0, 0)
 

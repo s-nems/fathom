@@ -4,11 +4,14 @@ import io.github.snems.fathom.SampleFleets.ship
 import io.github.snems.fathom.board.Board
 import io.github.snems.fathom.board.FLEET_SHIP_SIZES
 import io.github.snems.fathom.bot.reporting.BotEvent
+import io.github.snems.fathom.bot.reporting.BotEvent.Failed
+import io.github.snems.fathom.bot.reporting.BotEvent.LastResortShip
+import io.github.snems.fathom.bot.reporting.BotEvent.LastResortShot
 import io.github.snems.fathom.bot.shooting.SamplerSettings
 import io.github.snems.fathom.game.Game
 import io.github.snems.fathom.game.GameEvent
 import io.github.snems.fathom.game.GameEvent.BotFailed
-import io.github.snems.fathom.game.GameResult.Ending
+import io.github.snems.fathom.game.GameResult.Ending.FLEET_SUNK
 import io.github.snems.fathom.game.Player
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -23,7 +26,7 @@ import jd.mg.ships.tournament.api.ShotResult.SUNK
 import org.junit.jupiter.api.Test
 import kotlin.random.Random
 import kotlin.time.AbstractLongTimeSource
-import kotlin.time.DurationUnit
+import kotlin.time.DurationUnit.SECONDS
 import kotlin.time.TestTimeSource
 
 class FathomBotTest {
@@ -46,7 +49,7 @@ class FathomBotTest {
             val result = game.play()
 
             // then
-            result.ending shouldBe Ending.FLEET_SUNK
+            result.ending shouldBe FLEET_SUNK
             events.filterIsInstance<BotFailed>().shouldBeEmpty()
         }
     }
@@ -107,9 +110,38 @@ class FathomBotTest {
         // then
         ship.size shouldBe FLEET_SHIP_SIZES.first()
         shot shouldBeIn Board.positions
-        events.filterIsInstance<BotEvent.Failed>() shouldHaveSize 2
-        events.filterIsInstance<BotEvent.LastResortShip>() shouldHaveSize 1
-        events.filterIsInstance<BotEvent.LastResortShot>() shouldHaveSize 1
+        events.filterIsInstance<Failed>() shouldHaveSize 2
+        events.filterIsInstance<LastResortShip>() shouldHaveSize 1
+        events.filterIsInstance<LastResortShot>() shouldHaveSize 1
+    }
+
+    @Test
+    fun shouldAnswerWhenItsOwnCodeFailsWithAnError() {
+        // given
+        val events = mutableListOf<BotEvent>()
+        val bot = FathomBot(OverflowingRandom, observer = events::add)
+
+        // when
+        val shot = bot.chooseShot(Board.positions)
+
+        // then
+        shot shouldBeIn Board.positions
+        events.filterIsInstance<Failed>() shouldHaveSize 1
+    }
+
+    @Test
+    fun shouldStayOnTheBoardWhenItsOnlyCellThereWasRefused() {
+        // given
+        val bot = untimedBot(Random(SEED))
+        val onBoard = Position(3, 3)
+        val offBoard = Position(10, 3)
+        bot.chooseShot(listOf(onBoard))
+
+        // when
+        val shot = bot.chooseShot(listOf(offBoard, onBoard))
+
+        // then
+        shot shouldBe onBoard
     }
 
     @Test
@@ -153,9 +185,16 @@ class FathomBotTest {
     }
 
     /**
+     * A source of randomness that fails with an error instead of an exception.
+     */
+    private object OverflowingRandom : Random() {
+        override fun nextBits(bitCount: Int): Int = throw StackOverflowError()
+    }
+
+    /**
      * A clock that jumps ahead by more than the bot's time for one answer each time it is read.
      */
-    private class JumpingTimeSource : AbstractLongTimeSource(DurationUnit.SECONDS) {
+    private class JumpingTimeSource : AbstractLongTimeSource(SECONDS) {
         var reads = 0L
             private set
 
