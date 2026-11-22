@@ -40,8 +40,8 @@ The shooter always fires at the open cell most likely to hold a ship. It learns 
 its own games, where the hidden fleet is the answer. The placer is rewarded with the number of shots the
 shooter needed. The shooter also meets fleets of earlier versions of the placer.
 
-`tests/test_game.py` replays the game log in the root of the repository through the simulator and expects the
-results the referee logged.
+`tests/test_game.py` replays `tests/referee-game.log`, a copy of the game log in the root of the repository,
+through the simulator and expects the results the referee logged.
 
 ## Fleets as files
 

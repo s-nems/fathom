@@ -58,7 +58,8 @@ on an Intel i9-14900K:
 | Without it (`-Pinterpreted`) | 9 ms | 100 ms |
 
 **Illegal moves.** The bot shoots only at cells it is offered and places the first size in the list it is
-given. Asked again after a refused answer, it gives a different one. It never throws.
+given. Asked again after a refused answer, it gives a different one. It never throws. It logs nothing unless
+it is given an observer.
 
 ## Measurements
 
@@ -79,7 +80,7 @@ a shooter, higher for a layout. The name in the output is in brackets.
   loses nothing.
 - Sampling whole fleets saves 1.4 shots on random fleets and 5 on the bot's own.
 - Against an opponent with random fleets the bot wins 93.7% of games when the opponent shoots as `density` and
-  67.8% as `density-informed`.
+  67.8% as `density-informed`. The share is computed from the shot counts of both sides, not from played games.
 - A network trained on 400,000 of the bot's layouts sinks them in 47.0 shots, against 49.1 for random fleets.
   The layout is a bet that the opponent has not studied this bot.
 - A network shooter and placer trained against each other, without the bot, win 56% of games against it.
@@ -106,7 +107,7 @@ The statement leaves these open.
 
 `ReplayingLogTest` replays the ships and shots of a game log through the referee and compares the log written
 with the original, byte for byte. It runs on a log of this program and, locally, on the sample log that came
-with the task, which is not in the repository.
+with the task, which is not in the repository. Any log put in `app/src/test/resources/logs` is replayed.
 
 ## License
 
