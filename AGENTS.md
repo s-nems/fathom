@@ -25,7 +25,6 @@ Run the formatter and the build as two invocations.
 | `bot` | Module the tournament copies: the provided `Bot.kt`, `board` (rules), `bot` (the bot) |
 | `app` | Module with `game` (referee) and `app` (one game and its log). Depends on `bot` |
 | `arena` | Module with opponents and measurements, not part of the program. Depends on `bot` and `app` |
-| `buildSrc` | `fathom-module`, the build settings every module shares |
 | `experiments/neural` | A neural shooter and placer in Python, with its own README. Not part of the build |
 | `measurements` | Outputs of the arena behind the numbers in the README |
 

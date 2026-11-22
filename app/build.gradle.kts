@@ -1,5 +1,5 @@
 plugins {
-    id("fathom-module")
+    alias(libs.plugins.kotlin.jvm)
     application
 }
 

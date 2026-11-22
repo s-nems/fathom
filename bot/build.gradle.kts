@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
-    id("fathom-module")
+    alias(libs.plugins.kotlin.jvm)
     `java-test-fixtures`
 }
 

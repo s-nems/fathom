@@ -164,7 +164,6 @@ Outside the modules:
 
 | Path | Content |
 |---|---|
-| `buildSrc` | Build settings the modules share |
 | `measurements` | Outputs of the arena behind the numbers above |
 | `experiments/neural` | A neural shooter and placer in Python, outside the build |
 
