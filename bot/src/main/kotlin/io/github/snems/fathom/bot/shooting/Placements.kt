@@ -1,8 +1,12 @@
-package io.github.snems.fathom.bot
+package io.github.snems.fathom.bot.shooting
 
 import io.github.snems.fathom.board.FLEET_SHIP_SIZES
+import io.github.snems.fathom.bot.Candidate
+import io.github.snems.fathom.bot.CellSet
 
-/** Some placements of one ship size, with their cells side by side so that a scan over them is fast. */
+/**
+ * Some placements of one ship size, with their cells side by side so that a scan over them is fast.
+ */
 internal class Placements(
     private val candidates: List<Candidate>,
 ) {
@@ -11,7 +15,9 @@ internal class Placements(
 
     operator fun get(index: Int): Candidate = candidates[index]
 
-    /** How many of the placements cover none of the taken cells. */
+    /**
+     * How many of the placements cover none of the taken cells.
+     */
     fun countFreeOf(taken: CellSet): Int {
         var free = 0
         forEachFreeOf(taken) { free++ }
@@ -44,19 +50,29 @@ internal class Placements(
     }
 
     companion object {
-        /** Ship sizes of the fleet, largest first, each once. */
+        /**
+         * Ship sizes of the fleet, largest first, each once.
+         */
         val SIZES: IntArray = FLEET_SHIP_SIZES.distinct().sortedDescending().toIntArray()
 
-        /** Length of an array that is indexed by ship size. */
+        /**
+         * Length of an array that is indexed by ship size.
+         */
         val LENGTH_BY_SIZE: Int = SIZES.first() + 1
 
-        /** The largest number of placements a ship size has. */
+        /**
+         * The largest number of placements a ship size has.
+         */
         val MOST_OF_A_SIZE: Int = Candidate.BY_SIZE.values.maxOf { it.size }
 
-        /** Every placement on the board, looked up by ship size. */
+        /**
+         * Every placement on the board, looked up by ship size.
+         */
         val ALL: Array<Placements> = bySize { size -> Candidate.BY_SIZE.getValue(size) }
 
-        /** An array to look placements up by ship size. Sizes that are not in the fleet get none. */
+        /**
+         * An array to look placements up by ship size. Sizes that are not in the fleet get none.
+         */
         fun bySize(candidates: (Int) -> List<Candidate>): Array<Placements> =
             Array(LENGTH_BY_SIZE) { size -> Placements(if (size in SIZES) candidates(size) else emptyList()) }
     }

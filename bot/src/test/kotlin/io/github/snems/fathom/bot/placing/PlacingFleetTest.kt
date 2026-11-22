@@ -1,4 +1,4 @@
-package io.github.snems.fathom.bot
+package io.github.snems.fathom.bot.placing
 
 import io.github.snems.fathom.SampleFleets.COMPLETE
 import io.github.snems.fathom.board.Board
@@ -6,7 +6,10 @@ import io.github.snems.fathom.board.FLEET_SHIP_SIZES
 import io.github.snems.fathom.board.cells
 import io.github.snems.fathom.board.claimedCells
 import io.github.snems.fathom.board.isOnBoard
+import io.github.snems.fathom.bot.FathomBot
+import io.github.snems.fathom.bot.untimedBot
 import io.github.snems.fathom.game.Fleet
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.doubles.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeLessThan
@@ -14,6 +17,8 @@ import io.kotest.matchers.shouldBe
 import jd.mg.ships.tournament.api.Direction
 import jd.mg.ships.tournament.api.ShipPlacement
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -203,6 +208,16 @@ class PlacingFleetTest {
         (bestOfMany - firstDraft) shouldBeGreaterThan CLEAR_FREE_CELLS
     }
 
+    @ParameterizedTest(name = "edge chance {0}, {1} drafts")
+    @CsvSource("-0.1, 1", "1.1, 1", "0.5, 0")
+    fun shouldRefuseAPolicyOutOfRange(
+        edgeChance: Double,
+        drafts: Int,
+    ) {
+        // then
+        shouldThrow<IllegalArgumentException> { LayoutPolicy(edgeChance = edgeChance, drafts = drafts) }
+    }
+
     private fun fleetOf(bot: FathomBot): List<ShipPlacement> {
         var fleet = Fleet.EMPTY
         while (!fleet.isComplete) {
@@ -213,7 +228,9 @@ class PlacingFleetTest {
 
     private fun fleets(policy: LayoutPolicy) = List(SEEDS) { seed -> fleetOf(untimedBot(Random(seed), policy)) }
 
-    /** Share of the ships of the given size, or of the long ships, that lie along an edge of the board. */
+    /**
+     * Share of the ships of the given size, or of the long ships, that lie along an edge of the board.
+     */
     private fun edgeShare(
         policy: LayoutPolicy,
         sizes: Int? = null,
@@ -230,7 +247,9 @@ class PlacingFleetTest {
         return line == 0 || line == Board.SIZE - 1
     }
 
-    /** Whether two ships touch, at an edge or at a corner. */
+    /**
+     * Whether two ships touch, at an edge or at a corner.
+     */
     private fun touch(
         ship: ShipPlacement,
         other: ShipPlacement,

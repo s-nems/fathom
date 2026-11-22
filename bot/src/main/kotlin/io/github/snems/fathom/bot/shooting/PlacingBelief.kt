@@ -1,6 +1,8 @@
-package io.github.snems.fathom.bot
+package io.github.snems.fathom.bot.shooting
 
 import io.github.snems.fathom.board.FLEET_SHIP_SIZES
+import io.github.snems.fathom.bot.Candidate
+import io.github.snems.fathom.bot.CellSet
 import kotlin.random.Random
 
 /**
@@ -12,7 +14,9 @@ internal class PlacingBelief(
     private val sequentialChance: Double,
     private val random: Random,
 ) {
-    /** Looked up when the bot is built, so that its first move does not pay for the tables of placements. */
+    /**
+     * Looked up when the bot is built, so that its first move does not pay for the tables of placements.
+     */
     private val everyPlacement = Placements.ALL
     private val order = ArrayList<Candidate>(FLEET_SHIP_SIZES.size)
     private val taken = CellSet()
@@ -64,10 +68,11 @@ internal class PlacingBelief(
          */
         const val LEGAL_FLEETS = 2.95e14
 
-        /** Orders in which the ships of a fleet can be placed largest first: ships of equal size swap freely. */
+        /**
+         * Orders in which the ships of a fleet can be placed largest first: ships of equal size swap freely.
+         */
         val ORDERS: Double =
-            FLEET_SHIP_SIZES
-                .groupingBy { it }
+            FLEET_SHIP_SIZES.groupingBy { it }
                 .eachCount()
                 .values
                 .fold(1.0) { orders, ships -> orders * (1..ships).fold(1.0) { product, factor -> product * factor } }

@@ -79,7 +79,9 @@ class ReplayingLogTest {
         }
     }
 
-    /** Answers with the times of the original lines, one per line written. */
+    /**
+     * Answers with the times of the original lines, one per line written.
+     */
     private class ScriptedClock(
         times: List<LocalTime>,
     ) : Clock() {

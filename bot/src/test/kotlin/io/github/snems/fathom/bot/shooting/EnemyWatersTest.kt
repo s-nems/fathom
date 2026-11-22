@@ -1,7 +1,8 @@
-package io.github.snems.fathom.bot
+package io.github.snems.fathom.bot.shooting
 
 import io.github.snems.fathom.SampleFleets.ship
 import io.github.snems.fathom.board.FLEET_SHIP_SIZES
+import io.github.snems.fathom.bot.index
 import io.kotest.matchers.shouldBe
 import jd.mg.ships.tournament.api.Direction.HORIZONTAL
 import jd.mg.ships.tournament.api.Position
@@ -34,6 +35,19 @@ class EnemyWatersTest {
 
         // then
         waters.afloat shouldBe FLEET_SHIP_SIZES - sunk.size
+        waters.sunk.map { it.ship } shouldBe listOf(sunk)
+    }
+
+    @Test
+    fun shouldTakeASinkingReportedTwiceAsOneForASizeTheFleetLacks() {
+        // given
+        val sunk = ship(1, 4, 4, HORIZONTAL)
+
+        // when
+        repeat(2) { waters.record(Shot(Position(4, 4), SUNK, sunk)) }
+
+        // then
+        waters.afloat shouldBe FLEET_SHIP_SIZES
         waters.sunk.map { it.ship } shouldBe listOf(sunk)
     }
 }

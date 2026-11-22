@@ -3,54 +3,84 @@ package io.github.snems.fathom.bot
 import io.github.snems.fathom.board.Board
 import io.github.snems.fathom.board.FLEET_SHIP_SIZES
 import io.github.snems.fathom.board.cells
+import io.github.snems.fathom.board.cornerNeighbours
 import io.github.snems.fathom.board.edgeNeighbours
+import io.github.snems.fathom.board.isOnBoard
 import jd.mg.ships.tournament.api.Direction
 import jd.mg.ships.tournament.api.Position
 import jd.mg.ships.tournament.api.ShipPlacement
 
 internal const val CELL_COUNT = Board.SIZE * Board.SIZE
 
-/** The cell as a number from 0 to 99, row by row, for use as an array index. The cell has to be on the board. */
+/**
+ * The cell as a number from 0 to 99, row by row, for use as an array index. The cell has to be on the board.
+ */
 internal fun Position.index(): Int = y * Board.SIZE + x
 
-/** A ship on the board with its cells and the cells around it as array indices, worked out once. */
-internal class Candidate(
+/**
+ * A ship on the board with its cells and the cells around it as array indices, worked out once. [of] is the
+ * only way to one, and it hands out the same candidate for every ship of a size the fleet has.
+ */
+internal class Candidate private constructor(
     val ship: ShipPlacement,
 ) {
     val cells: IntArray = ship.cells().map { it.index() }.toIntArray()
 
-    /** Cells that share an edge with the ship. */
+    /**
+     * Cells that share an edge with the ship.
+     */
     val neighbours: IntArray = ship.edgeNeighbours().map { it.index() }.toIntArray()
 
-    /** The ship's cells as bits. */
     val covered = Cells(cells)
 
-    /** The cells no other ship may cover, as bits: the ship's cells and the cells sharing an edge with it. */
+    /**
+     * The cells no other ship may cover, as bits: the ship's cells and the cells sharing an edge with it.
+     */
     val claim = Cells(cells + neighbours)
 
-    /** Whether the ship lies in the first or last row or column, along it. */
-    val isAlongEdge: Boolean =
-        (if (ship.direction == Direction.HORIZONTAL) ship.position.y else ship.position.x).let { line ->
-            line == 0 || line == Board.SIZE - 1
+    /**
+     * The row a horizontal ship lies in, or the column of a vertical one.
+     */
+    private val line: Int =
+        when (ship.direction) {
+            Direction.HORIZONTAL -> ship.position.y
+            Direction.VERTICAL -> ship.position.x
         }
 
-    /** Cells that touch the ship at a corner only. Rarely needed, so worked out on first use. */
+    /**
+     * Whether the ship lies in the first or last row or column, along it.
+     */
+    val isAlongEdge: Boolean = line == 0 || line == Board.SIZE - 1
+
+    /**
+     * Cells that touch the ship at a corner only. Rarely needed, so worked out on first use.
+     */
     val corners: IntArray by lazy {
-        val diagonal =
-            ship.cells().flatMap { (x, y) ->
-                listOf(Position(x - 1, y - 1), Position(x + 1, y - 1), Position(x - 1, y + 1), Position(x + 1, y + 1))
-            }
-        (diagonal.filter { it in Board }.map { it.index() }.toSet() - cells.toSet() - neighbours.toSet()).toIntArray()
+        val own = ship.cells()
+        val beside = ship.edgeNeighbours()
+        own.flatMap { it.cornerNeighbours() }
+            .distinct()
+            .filter { it !in own && it !in beside }
+            .map { it.index() }
+            .toIntArray()
     }
 
     companion object {
-        /** Every placement of every ship size of the fleet. */
+        /**
+         * Every placement of every ship size of the fleet.
+         */
         val BY_SIZE: Map<Int, List<Candidate>> =
             FLEET_SHIP_SIZES.distinct().associateWith { size -> Board.placementsOf(size).map(::Candidate) }
 
         private val BY_SHIP: Map<ShipPlacement, Candidate> = BY_SIZE.values.flatten().associateBy { it.ship }
 
-        /** The candidate for a ship that lies on the board. */
-        fun of(ship: ShipPlacement): Candidate = BY_SHIP[ship] ?: Candidate(ship)
+        /**
+         * @throws IllegalArgumentException if the ship does not lie on the board
+         */
+        fun of(ship: ShipPlacement): Candidate {
+            BY_SHIP[ship]?.let { return it }
+            require(ship.isOnBoard()) { "Not on the board: $ship" }
+            return Candidate(ship)
+        }
     }
 }

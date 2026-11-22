@@ -3,7 +3,11 @@ package io.github.snems.fathom.arena
 import java.util.Locale
 import kotlin.math.sqrt
 
-/** Mean of a sample with its 95% confidence interval. */
+private const val DRAW_SHARE = 0.5
+
+/**
+ * Mean of a sample with its 95% confidence interval.
+ */
 class Estimate(
     values: DoubleArray,
 ) {
@@ -14,7 +18,9 @@ class Estimate(
     val mean: Double = values.average()
     val deviation: Double = sqrt(values.sumOf { (it - mean) * (it - mean) } / (values.size - 1))
 
-    /** Half the width of the 95% confidence interval of the mean. */
+    /**
+     * Half the width of the 95% confidence interval of the mean.
+     */
     val margin: Double = NORMAL_95 * deviation / sqrt(values.size.toDouble())
 
     override fun toString(): String = "%.2f ± %.2f".format(Locale.ROOT, mean, margin)
@@ -24,7 +30,7 @@ class Estimate(
     }
 }
 
-fun IntArray.estimate() = Estimate(DoubleArray(size) { this[it].toDouble() })
+fun IntArray.estimate(): Estimate = Estimate(DoubleArray(size) { this[it].toDouble() })
 
 /**
  * Chance that a game needing [mine] shots beats an independent game needing [theirs], when the lower count wins
@@ -47,5 +53,3 @@ fun winProbability(
         }
     return wins / (mine.size.toDouble() * theirs.size)
 }
-
-private const val DRAW_SHARE = 0.5

@@ -1,34 +1,45 @@
-package io.github.snems.fathom.bot
+package io.github.snems.fathom.bot.shooting
 
 import io.github.snems.fathom.board.Board
 import io.github.snems.fathom.board.FLEET_SHIP_SIZES
 import io.github.snems.fathom.board.isOnBoard
+import io.github.snems.fathom.bot.CELL_COUNT
+import io.github.snems.fathom.bot.Candidate
+import io.github.snems.fathom.bot.index
 import jd.mg.ships.tournament.api.ShipPlacement
 import jd.mg.ships.tournament.api.Shot
 import jd.mg.ships.tournament.api.ShotResult
 
-/** What the results of the bot's shots say about the fleet it is shooting at. */
+/**
+ * What the results of the bot's shots say about the fleet it is shooting at.
+ */
 internal class EnemyWaters {
-    /** Cells that hold no ship afloat: misses, sunk ships and the cells sharing an edge with them. */
+    /**
+     * Cells that hold no ship afloat: misses, sunk ships and the cells sharing an edge with them.
+     */
     private val closed = BooleanArray(CELL_COUNT)
 
-    /** Hits on ships that are still afloat. */
+    /**
+     * Hits on ships that are still afloat.
+     */
     private val openHit = BooleanArray(CELL_COUNT)
 
-    /** Sizes of the ships still afloat, largest first. */
+    /**
+     * Sizes of the ships still afloat, largest first.
+     */
     var afloat: List<Int> = FLEET_SHIP_SIZES
         private set
 
-    /** Ships reported sunk, in the order they sank. */
     var sunk: List<Candidate> = emptyList()
         private set
 
     val hasOpenHits: Boolean get() = openHit.any { it }
 
-    /** Cells of the open hits, in board order. */
-    fun openHits(): IntArray = (0 until CELL_COUNT).filter { openHit[it] }.toIntArray()
+    fun openHits(): IntArray = (0..<CELL_COUNT).filter { openHit[it] }.toIntArray()
 
-    /** Takes in the result of a shot. A result for a cell off the board is ignored. */
+    /**
+     * Takes in the result of a shot. A result for a cell off the board is ignored.
+     */
     fun record(shot: Shot) {
         if (shot.position !in Board) return
         val sunkShip = shot.sunkShip?.takeIf { shot.result == ShotResult.SUNK && it.isOnBoard() }
@@ -43,9 +54,9 @@ internal class EnemyWaters {
     }
 
     private fun sink(ship: ShipPlacement) {
-        val candidate = Candidate.of(ship)
         // A sinking reported a second time changes nothing.
-        if (candidate in sunk) return
+        if (sunk.any { it.ship == ship }) return
+        val candidate = Candidate.of(ship)
         candidate.cells.forEach {
             closed[it] = true
             openHit[it] = false

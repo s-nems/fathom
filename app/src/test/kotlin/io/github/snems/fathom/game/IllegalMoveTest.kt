@@ -34,7 +34,7 @@ class IllegalMoveTest {
         // then
         result.winner shouldBe Player.ONE
         result.fleetOf(Player.ONE) shouldBe COMPLETE
-        hesitant.placementCalls.take(3).map { it.first } shouldContainExactly List(3) { emptyList() }
+        hesitant.placementCalls.take(3).map { it.ownFleet } shouldContainExactly List(3) { emptyList() }
         events.filterIsInstance<BotFailed>() shouldContainExactly List(2) { BotFailed(Player.ONE, error = null) }
     }
 

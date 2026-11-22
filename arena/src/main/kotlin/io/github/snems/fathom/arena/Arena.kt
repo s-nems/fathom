@@ -1,14 +1,18 @@
 package io.github.snems.fathom.arena
 
+import io.github.snems.fathom.app.logToStandardOutput
+import io.github.snems.fathom.arena.layouts.FileLayouts
+import io.github.snems.fathom.arena.layouts.LayoutFile
+import io.github.snems.fathom.arena.layouts.LayoutKind
+import io.github.snems.fathom.arena.layouts.draw
+import io.github.snems.fathom.arena.shooters.ShooterKind
 import io.github.snems.fathom.bot.FathomBot
-import io.github.snems.fathom.bot.LayoutPolicy
-import io.github.snems.fathom.bot.SamplerSettings
+import java.lang.System.Logger.Level
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.Locale
-import kotlin.random.Random
-import kotlin.time.Duration
 
+private val log = System.getLogger("arena")
 private const val DEFAULT_GAMES = 1_000
 private const val DEFAULT_SEED = 1L
 private const val DEFAULT_TIMED_GAMES = 3
@@ -16,55 +20,12 @@ private const val TIME = "time"
 private const val LAYOUTS = "layouts"
 private const val SHOTS = "shots"
 private const val SHOTS_SUFFIX = ".shots"
-private const val FREQUENCY_LAYOUTS = 10_000
 private const val LABEL_WIDTH = 20
 private const val CELL_WIDTH = 20
 private const val PERCENT = 100
-
-/** The bot under test, as a shooter and as a layout source. */
-private const val FATHOM = "fathom"
-
-/** Fleets placed ship by ship at random, the way a simple opponent places them. */
-private const val SEQUENTIAL = "sequential"
-
-/** A density shooter that has seen many layouts of the source it shoots at. */
-private const val INFORMED = "density-informed"
-
-private val layoutSources: Map<String, LayoutSource> =
-    linkedMapOf(
-        SEQUENTIAL to SequentialLayouts(shuffled = false),
-        "shuffled" to SequentialLayouts(shuffled = true),
-        FATHOM to BotLayouts { random -> fathom(random) },
-        "fathom-no-edge" to BotLayouts { random -> fathom(random, LayoutPolicy(edgeChance = 0.0)) },
-        "fathom-first-draft" to BotLayouts { random -> fathom(random, LayoutPolicy(drafts = 1)) },
-    )
-
-/** Shooters by name. Each is built for the layout source it will shoot at, which only the informed one uses. */
-private fun shooters(seed: Long): Map<String, (LayoutSource) -> (Random) -> Shooter> =
-    linkedMapOf(
-        "random" to { _ -> { random -> RandomShooter(random) } },
-        "hunt-target" to { _ -> { random -> HuntTargetShooter(random, parity = false) } },
-        "hunt-target-parity" to { _ -> { random -> HuntTargetShooter(random, parity = true) } },
-        "density" to { _ -> { random -> DensityShooter(random) } },
-        INFORMED to { source ->
-            val frequencies = PlacementFrequencies(source, FREQUENCY_LAYOUTS, seed)
-            return@to { random -> DensityShooter(random, frequencies::weightOf) }
-        },
-        FATHOM to { _ -> { random -> fathom(random).asShooter() } },
-        "fathom-sequential" to
-            { _ -> { random -> fathom(random, sampler = SamplerSettings(sequentialChance = 1.0)).asShooter() } },
-        "fathom-any-fleet" to
-            { _ -> { random -> fathom(random, sampler = SamplerSettings(sequentialChance = 0.0)).asShooter() } },
-        "fathom-no-sampling" to
-            { _ -> { random -> fathom(random, sampler = SamplerSettings(samples = 0)).asShooter() } },
-    )
-
-/** The bot without a time budget, so that a table does not depend on how fast the machine is. */
-private fun fathom(
-    random: Random,
-    layout: LayoutPolicy = LayoutPolicy(),
-    sampler: SamplerSettings = SamplerSettings(),
-) = FathomBot(random, layout, sampler, timeBudget = Duration.INFINITE)
+private const val LAYOUTS_USAGE = "layouts <source> <games> <seed> <file>"
+private val LAYOUTS_ARGUMENTS = LAYOUTS_USAGE.split(" ").size
+private const val SHOTS_USAGE = "shots <file>"
 
 /**
  * Without arguments prints the shot table for 1000 games and seed 1. Arguments:
@@ -72,8 +33,11 @@ private fun fathom(
  * - `time <games>` for the longest calls of the bot,
  * - `layouts <source> <games> <seed> <file>` to write fleets of a layout source to a file,
  * - `shots <file>` to shoot at the fleets of a file.
+ *
+ * @throws IllegalArgumentException if an argument is missing or is not what its place asks for
  */
 fun main(args: Array<String>) {
+    logToStandardOutput()
     when (args.firstOrNull()) {
         TIME -> {
             val games = args.getOrNull(1)?.toInt() ?: DEFAULT_TIMED_GAMES
@@ -81,12 +45,13 @@ fun main(args: Array<String>) {
         }
 
         LAYOUTS -> {
+            require(args.size == LAYOUTS_ARGUMENTS) { "Usage: $LAYOUTS_USAGE" }
             val (source, games, seed, file) = args.drop(1)
-            LayoutFile.write(Path.of(file), layoutSources.getValue(source).draw(games.toInt(), seed.toLong()))
+            LayoutFile.write(Path.of(file), LayoutKind.labelled(source).source.draw(games.toInt(), seed.toLong()))
         }
 
         SHOTS -> {
-            printShotsAt(Path.of(args[1]))
+            printShotsAt(Path.of(requireNotNull(args.getOrNull(1)) { "Usage: $SHOTS_USAGE" }))
         }
 
         else -> {
@@ -103,11 +68,11 @@ fun main(args: Array<String>) {
 private fun printShotsAt(file: Path) {
     val fleets = LayoutFile.read(file)
     val range = ShootingRange(fleets.map(ShootingRange::fleetOf), DEFAULT_SEED)
-    println("Mean shots to sink the fleet, 95% interval, ${fleets.size} fleets of $file")
-    shooters(DEFAULT_SEED).forEach { (name, shooter) ->
-        val shots = range.shotsToSink(shooter(FileLayouts(fleets)))
-        println(row(name, listOf(shots.estimate().toString())))
-        if (name == FATHOM) Files.write(Path.of("$file$SHOTS_SUFFIX"), shots.map(Int::toString))
+    log.log(Level.INFO, "Mean shots to sink the fleet, 95% interval, ${fleets.size} fleets of $file")
+    ShooterKind.entries.forEach { shooter ->
+        val shots = range.shotsToSink(shooter.against(FileLayouts(fleets), DEFAULT_SEED))
+        log.log(Level.INFO, row(shooter.label, listOf(shots.estimate().toString())))
+        if (shooter == ShooterKind.FATHOM) Files.write(Path.of("$file$SHOTS_SUFFIX"), shots.map(Int::toString))
     }
 }
 
@@ -119,22 +84,30 @@ private fun printShotTable(
     games: Int,
     seed: Long,
 ) {
-    val ranges = layoutSources.mapValues { (_, source) -> ShootingRange(source, games, seed) }
+    val layouts = LayoutKind.entries
+    val ranges = layouts.associateWith { ShootingRange(it.source, games, seed) }
     val shots =
-        shooters(seed).mapValues { (_, shooter) ->
-            layoutSources.mapValues { (layout, source) -> ranges.getValue(layout).shotsToSink(shooter(source)) }
+        ShooterKind.entries.associateWith { shooter ->
+            layouts.associateWith { ranges.getValue(it).shotsToSink(shooter.against(it.source, seed)) }
         }
 
-    println("Mean shots to sink the fleet, 95% interval, $games games per cell, seed $seed")
-    println(row("shooter \\ layouts", layoutSources.keys))
-    shots.forEach { (shooter, byLayout) -> println(row(shooter, byLayout.values.map { it.estimate().toString() })) }
+    log.log(Level.INFO, "Mean shots to sink the fleet, 95% interval, $games games per cell, seed $seed")
+    log.log(Level.INFO, row("shooter \\ layouts", layouts.map { it.label }))
+    shots.forEach { (shooter, byLayout) ->
+        log.log(Level.INFO, row(shooter.label, byLayout.values.map { it.estimate().toString() }))
+    }
 
-    println()
-    println("Share of games $FATHOM wins when the opponent places $SEQUENTIAL fleets and shoots as")
-    val own = shots.getValue(FATHOM).getValue(SEQUENTIAL)
-    (shots - FATHOM).forEach { (shooter, byLayout) ->
-        val share = winProbability(mine = own, theirs = byLayout.getValue(FATHOM))
-        println(row(shooter, listOf("%.1f%%".format(Locale.ROOT, share * PERCENT))))
+    val bot = ShooterKind.FATHOM
+    val opponentLayouts = LayoutKind.SEQUENTIAL
+    log.log(Level.INFO, "")
+    log.log(
+        Level.INFO,
+        "Share of games ${bot.label} wins when the opponent places ${opponentLayouts.label} fleets and shoots as",
+    )
+    val own = shots.getValue(bot).getValue(opponentLayouts)
+    (shots - bot).forEach { (shooter, byLayout) ->
+        val share = winProbability(mine = own, theirs = byLayout.getValue(LayoutKind.FATHOM))
+        log.log(Level.INFO, row(shooter.label, listOf("%.1f%%".format(Locale.ROOT, share * PERCENT))))
     }
 }
 

@@ -1,6 +1,7 @@
-package io.github.snems.fathom.bot
+package io.github.snems.fathom.bot.placing
 
 import io.github.snems.fathom.board.isOnBoard
+import io.github.snems.fathom.bot.TimeBudget
 import jd.mg.ships.tournament.api.ShipPlacement
 
 /**
@@ -14,33 +15,36 @@ internal class FleetPlanner(
     private var plan: List<ShipPlacement> = emptyList()
     private var lastAnswer: ShipPlacement? = null
 
-    /** Placements the referee did not accept. */
     private val refused = mutableSetOf<ShipPlacement>()
 
     /**
      * The next ship to place: one of the first size the referee still wants, given the ships it has accepted.
-     *
-     * @throws NoSuchElementException if no ship of that size fits among the accepted ones
+     * Null when it wants none, or when no ship of that size fits among the accepted ones.
      */
     fun nextShip(
         accepted: List<ShipPlacement>,
         remainingSizes: List<Int>,
-    ): ShipPlacement {
-        lastAnswer?.takeIf { it !in accepted }?.let(::refuse)
+    ): ShipPlacement? {
+        val answered = lastAnswer
+        if (answered != null && answered !in accepted) refuse(answered)
         val placed = accepted.filter { it.isOnBoard() }
-        val size = remainingSizes.first()
+        val size = remainingSizes.firstOrNull() ?: return null
         val ship = planned(placed, size) ?: drafted(placed, remainingSizes)
         lastAnswer = ship
         return ship
     }
 
-    /** The referee reads the rules more strictly than this bot, so the plan made under the bot's reading goes. */
+    /**
+     * The referee reads the rules more strictly than this bot, so the plan made under the bot's reading goes.
+     */
     private fun refuse(ship: ShipPlacement) {
         refused += ship
         plan = emptyList()
     }
 
-    /** The ship the plan has for this size, when the plan still contains everything that was accepted. */
+    /**
+     * The ship the plan has for this size, when the plan still contains everything that was accepted.
+     */
     private fun planned(
         placed: List<ShipPlacement>,
         size: Int,
@@ -48,19 +52,19 @@ internal class FleetPlanner(
 
     /**
      * A new plan and its first ship. If no whole fleet fits, one ship is enough, and if the caution after a
-     * refusal leaves no room for it, the bot's own reading of the rules has to do.
+     * refusal leaves no room for it, the bot's own reading of the rules has to do. Null when even that fails.
      */
     private fun drafted(
         placed: List<ShipPlacement>,
         remainingSizes: List<Int>,
-    ): ShipPlacement {
+    ): ShipPlacement? {
         val deadline = timeBudget.start()
         val cautious = refused.isNotEmpty()
         val nextSize = remainingSizes.take(1)
         plan = drafts.best(placed, remainingSizes, refused, cautious, deadline)
             ?: drafts.best(placed, nextSize, refused, cautious, deadline)
             ?: (if (cautious) drafts.best(placed, nextSize, refused, cautious = false, deadline) else null)
-            ?: throw NoSuchElementException("No ship of ${remainingSizes.first()} cells fits among $placed")
+            ?: return null
         return plan.first { it !in placed }
     }
 }

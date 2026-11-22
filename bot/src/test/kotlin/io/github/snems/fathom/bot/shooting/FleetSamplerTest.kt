@@ -1,10 +1,14 @@
-package io.github.snems.fathom.bot
+package io.github.snems.fathom.bot.shooting
 
 import io.github.snems.fathom.SampleFleets.COMPLETE
 import io.github.snems.fathom.board.Board
 import io.github.snems.fathom.board.FLEET_SHIP_SIZES
 import io.github.snems.fathom.board.cells
 import io.github.snems.fathom.board.edgeNeighbours
+import io.github.snems.fathom.bot.CELL_COUNT
+import io.github.snems.fathom.bot.TimeBudget
+import io.github.snems.fathom.bot.index
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.shouldBe
 import jd.mg.ships.tournament.api.Position
@@ -15,6 +19,7 @@ import jd.mg.ships.tournament.api.ShotResult.MISS
 import jd.mg.ships.tournament.api.ShotResult.SUNK
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 import java.util.BitSet
 import kotlin.random.Random
@@ -85,7 +90,7 @@ class FleetSamplerTest {
         hit(afloat[0].cells()[1])
         hit(afloat[2].cells()[0])
         hit(afloat[2].cells()[2])
-        (0 until Board.SIZE).forEach { x -> miss(Position(x, 8)) }
+        (0..<Board.SIZE).forEach { x -> miss(Position(x, 8)) }
         (0..4).forEach { x -> miss(Position(x, 5)) }
 
         // when
@@ -149,7 +154,19 @@ class FleetSamplerTest {
         drawn shouldBe listOf(FLEETS_DRAWN_IN_BUDGET)
     }
 
-    /** A clock that moves on by a millisecond each time it is read. */
+    @ParameterizedTest(name = "{0} samples, sequential chance {1}")
+    @CsvSource("-1, 0.5", "1, -0.1", "1, 1.1")
+    fun shouldRefuseSettingsOutOfRange(
+        samples: Int,
+        sequentialChance: Double,
+    ) {
+        // then
+        shouldThrow<IllegalArgumentException> { SamplerSettings(samples, sequentialChance) }
+    }
+
+    /**
+     * A clock that moves on by a millisecond each time it is read.
+     */
     private class TickingTimeSource : AbstractLongTimeSource(DurationUnit.MILLISECONDS) {
         private var now = 0L
 
@@ -180,7 +197,9 @@ class FleetSamplerTest {
         waters.record(Shot(position, MISS))
     }
 
-    /** Sinks the ships cell by cell, as a referee would report it. */
+    /**
+     * Sinks the ships cell by cell, as a referee would report it.
+     */
     private fun sink(ships: List<ShipPlacement>) {
         ships.forEach { ship ->
             ship.cells().dropLast(1).forEach { waters.record(Shot(it, HIT)) }
@@ -222,7 +241,9 @@ class FleetSamplerTest {
         return sums
     }
 
-    /** Likelihood of a whole fleet under the belief, compared with picking any legal fleet with equal chance. */
+    /**
+     * Likelihood of a whole fleet under the belief, compared with picking any legal fleet with equal chance.
+     */
     private fun likelihood(
         fleet: List<ShipPlacement>,
         sequentialChance: Double,
@@ -232,7 +253,9 @@ class FleetSamplerTest {
         return sequentialChance * inSequence + (1.0 - sequentialChance)
     }
 
-    /** The chance that placing ship after ship at random, largest first, gives this fleet, over every order. */
+    /**
+     * The chance that placing ship after ship at random, largest first, gives this fleet, over every order.
+     */
     private fun chanceOfPlacingInSequence(fleet: List<ShipPlacement>): Double {
         val placed = mutableListOf<ShipPlacement>()
         var chance = 1.0
@@ -258,7 +281,9 @@ class FleetSamplerTest {
 
     private fun cellsOf(ship: ShipPlacement): BitSet = cellBits.getOrPut(ship) { bits(ship.cells()) }
 
-    /** The cells of the ships and the cells sharing an edge with them, where no other ship may lie. */
+    /**
+     * The cells of the ships and the cells sharing an edge with them, where no other ship may lie.
+     */
     private fun claimOf(ships: List<ShipPlacement>): BitSet = bits(ships.flatMap { it.cells() + it.edgeNeighbours() })
 
     private fun bits(positions: Collection<Position>): BitSet =
@@ -279,12 +304,16 @@ class FleetSamplerTest {
         const val SAMPLES = 100_000
         const val MANY_SAMPLES = 400_000
 
-        /** About twice the largest error seen with this many samples. A wrong weight is off by 0.004 or more. */
+        /**
+         * About twice the largest error seen with this many samples. A wrong weight is off by 0.004 or more.
+         */
         const val SAMPLING_ERROR = 0.0015
         const val ESTIMATE_ERROR = 0.02
         const val TICKS_IN_BUDGET = 20
 
-        /** The clock is read once to start the time, once to find its zero, and once before each fleet. */
+        /**
+         * The clock is read once to start the time, once to find its zero, and once before each fleet.
+         */
         const val FLEETS_DRAWN_IN_BUDGET = 18
     }
 }

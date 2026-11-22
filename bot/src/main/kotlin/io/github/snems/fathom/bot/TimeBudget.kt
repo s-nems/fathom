@@ -12,6 +12,8 @@ internal class TimeBudget(
     private val duration: Duration,
     private val timeSource: TimeSource,
 ) {
-    /** Starts the time for one answer and returns the moment it is up. */
+    /**
+     * Starts the time for one answer and returns the moment it is up.
+     */
     fun start(): TimeMark = timeSource.markNow() + duration
 }

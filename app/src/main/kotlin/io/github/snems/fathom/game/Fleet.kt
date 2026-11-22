@@ -4,19 +4,21 @@ import io.github.snems.fathom.board.FLEET_SHIP_SIZES
 import io.github.snems.fathom.board.fitsAmong
 import jd.mg.ships.tournament.api.ShipPlacement
 
-/** The ships one player has placed so far. Placing a ship returns the next fleet and leaves this one unchanged. */
+/**
+ * The ships one player has placed so far. Placing a ship returns the next fleet and leaves this one unchanged.
+ */
 class Fleet private constructor(
     val ships: List<ShipPlacement>,
 ) {
-    /** Sizes still to place, largest first. */
     val remainingSizes: List<Int> = ships.fold(FLEET_SHIP_SIZES) { sizes, ship -> sizes - ship.size }
 
     val isComplete: Boolean get() = remainingSizes.isEmpty()
 
-    /** Whether the ship has one of the remaining sizes and fits among the ships already placed. */
     fun accepts(ship: ShipPlacement): Boolean = ship.size in remainingSizes && ship.fitsAmong(ships)
 
-    /** @throws IllegalArgumentException if the fleet does not accept the ship */
+    /**
+     * @throws IllegalArgumentException if the fleet does not accept the ship
+     */
     fun place(ship: ShipPlacement): Fleet {
         require(accepts(ship)) { "Cannot place $ship in a fleet of $ships" }
         return Fleet(ships + ship)

@@ -1,8 +1,9 @@
-package io.github.snems.fathom.bot
+package io.github.snems.fathom.bot.shooting
 
 import io.github.snems.fathom.SampleFleets.COMPLETE
 import io.github.snems.fathom.board.Board
 import io.github.snems.fathom.board.cells
+import io.github.snems.fathom.bot.untimedBot
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -95,7 +96,9 @@ class ShootingTest {
         }
     }
 
-    /** Tells the bot the result of a shot at the cell, as the referee would. */
+    /**
+     * Tells the bot the result of a shot at the cell, as the referee would.
+     */
     private fun answer(
         position: Position,
         result: ShotResult,

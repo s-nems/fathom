@@ -43,15 +43,14 @@ internal class GameLogWriter(
     }
 
     private fun line(text: String) {
-        out
-            .append(TIME.format(LocalTime.now(clock)))
+        out.append(TIME.format(LocalTime.now(clock)))
             .append(' ')
             .append(text)
             .append('\n')
     }
 
     private fun describe(ship: ShipPlacement) =
-        "size=${ship.size} ${describe(ship.position)} dir=${ship.direction.name.lowercase(Locale.ROOT)}"
+        "size=${ship.size} ${describe(ship.position)} dir=${ship.direction.name.lowercase()}"
 
     private fun describe(shot: Shot): String {
         val result =

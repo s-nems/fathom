@@ -1,5 +1,6 @@
 package io.github.snems.fathom.game
 
+import io.github.snems.fathom.PlacementCall
 import io.github.snems.fathom.SampleFleets.COMPLETE
 import io.github.snems.fathom.SampleFleets.TRANSPOSED
 import io.github.snems.fathom.ScriptedBot
@@ -24,10 +25,14 @@ import org.junit.jupiter.api.Test
 class PlayingGameTest {
     private val events = mutableListOf<GameEvent>()
 
-    /** Places [COMPLETE], knows where the other fleet is and never misses. */
+    /**
+     * Places [COMPLETE], knows where the other fleet is and never misses.
+     */
     private val sniper = ScriptedBot(placements = COMPLETE, shots = TRANSPOSED.flatMap { it.cells() })
 
-    /** Places [TRANSPOSED] and shoots at every cell, row by row. */
+    /**
+     * Places [TRANSPOSED] and shoots at every cell, row by row.
+     */
     private val sweeper = ScriptedBot(placements = TRANSPOSED, shots = Board.positions)
 
     @Test
@@ -40,9 +45,9 @@ class PlayingGameTest {
 
         // then
         sniper.placementCalls shouldHaveSize COMPLETE.size
-        sniper.placementCalls[0] shouldBe (emptyList<Nothing>() to listOf(5, 4, 4, 3, 3, 3, 2, 2, 2, 2))
-        sniper.placementCalls[1] shouldBe (COMPLETE.take(1) to listOf(4, 4, 3, 3, 3, 2, 2, 2, 2))
-        sniper.placementCalls.last() shouldBe (COMPLETE.dropLast(1) to listOf(2))
+        sniper.placementCalls[0] shouldBe PlacementCall(emptyList(), listOf(5, 4, 4, 3, 3, 3, 2, 2, 2, 2))
+        sniper.placementCalls[1] shouldBe PlacementCall(COMPLETE.take(1), listOf(4, 4, 3, 3, 3, 2, 2, 2, 2))
+        sniper.placementCalls.last() shouldBe PlacementCall(COMPLETE.dropLast(1), listOf(2))
     }
 
     @Test

@@ -3,6 +3,8 @@ package io.github.snems.fathom.bot
 import io.github.snems.fathom.SampleFleets.ship
 import io.github.snems.fathom.board.Board
 import io.github.snems.fathom.board.FLEET_SHIP_SIZES
+import io.github.snems.fathom.bot.reporting.BotEvent
+import io.github.snems.fathom.bot.shooting.SamplerSettings
 import io.github.snems.fathom.game.Game
 import io.github.snems.fathom.game.GameEvent
 import io.github.snems.fathom.game.GameEvent.BotFailed
@@ -11,6 +13,7 @@ import io.github.snems.fathom.game.Player
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldBeIn
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import jd.mg.ships.tournament.api.Direction.HORIZONTAL
 import jd.mg.ships.tournament.api.Position
@@ -92,6 +95,24 @@ class FathomBotTest {
     }
 
     @Test
+    fun shouldReportAFailureOfItsOwnCodeAndStillAnswer() {
+        // given
+        val events = mutableListOf<BotEvent>()
+        val bot = FathomBot(BrokenRandom, observer = events::add)
+
+        // when
+        val ship = bot.placeShip(emptyList(), FLEET_SHIP_SIZES)
+        val shot = bot.chooseShot(Board.positions)
+
+        // then
+        ship.size shouldBe FLEET_SHIP_SIZES.first()
+        shot shouldBeIn Board.positions
+        events.filterIsInstance<BotEvent.Failed>() shouldHaveSize 2
+        events.filterIsInstance<BotEvent.LastResortShip>() shouldHaveSize 1
+        events.filterIsInstance<BotEvent.LastResortShot>() shouldHaveSize 1
+    }
+
+    @Test
     fun shouldIgnoreCellsOffTheBoard() {
         // given
         val bot = untimedBot(Random(SEED))
@@ -124,7 +145,16 @@ class FathomBotTest {
         readsToShoot shouldBe READS_OF_AN_ANSWER_OUT_OF_TIME
     }
 
-    /** A clock that jumps ahead by more than the bot's time for one answer each time it is read. */
+    /**
+     * A source of randomness that fails, to stand for a fault in the bot's own code.
+     */
+    private object BrokenRandom : Random() {
+        override fun nextBits(bitCount: Int): Int = error("No randomness")
+    }
+
+    /**
+     * A clock that jumps ahead by more than the bot's time for one answer each time it is read.
+     */
     private class JumpingTimeSource : AbstractLongTimeSource(DurationUnit.SECONDS) {
         var reads = 0L
             private set
@@ -137,7 +167,9 @@ class FathomBotTest {
         override fun read(): Long = reads++
     }
 
-    /** The bot with few samples per shot, so that many whole games stay fast. */
+    /**
+     * The bot with few samples per shot, so that many whole games stay fast.
+     */
     private fun quickBot(random: Random) =
         untimedBot(random, samplerSettings = SamplerSettings(samples = QUICK_SAMPLES))
 

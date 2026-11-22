@@ -1,4 +1,7 @@
-package io.github.snems.fathom.bot
+package io.github.snems.fathom.bot.shooting
+
+import io.github.snems.fathom.bot.CELL_COUNT
+import io.github.snems.fathom.bot.Candidate
 
 /**
  * Weighs a cell by the number of placements of the ships afloat that pass over it, each ship counted on its

@@ -28,7 +28,9 @@ class Game(
     private val seats = mapOf(Player.ONE to Seat(playerOne), Player.TWO to Seat(playerTwo))
     private var played = false
 
-    /** @throws IllegalStateException if the game has been played already */
+    /**
+     * @throws IllegalStateException if the game has been played already
+     */
     fun play(): GameResult {
         check(!played) { "A game is played once" }
         played = true
@@ -71,7 +73,9 @@ class Game(
         }
     }
 
-    /** The first legal answer of the bot. */
+    /**
+     * The first legal answer of the bot.
+     */
     private fun <T : Any> ask(
         player: Player,
         isLegal: (T) -> Boolean,
@@ -95,7 +99,9 @@ class Game(
         throw Forfeit(player, Ending.ILLEGAL_MOVES)
     }
 
-    /** Passes the result of a shot to the bot that fired it. False when the bot took too long over it. */
+    /**
+     * Passes the result of a shot to the bot that fired it. False when the bot took too long over it.
+     */
     private fun tell(
         player: Player,
         shot: Shot,
@@ -123,7 +129,9 @@ class Game(
         fleets = seats.mapValues { (_, seat) -> seat.fleet.ships },
     )
 
-    /** What the referee keeps about one player. */
+    /**
+     * What the referee keeps about one player.
+     */
     private class Seat(
         val bot: Bot,
     ) {
@@ -131,7 +139,9 @@ class Game(
         var shotsFired = 0
     }
 
-    /** Ends the game from wherever the bot of the player lost it. Never leaves this class. */
+    /**
+     * Ends the game from wherever the bot of the player lost it. Never leaves this class.
+     */
     private class Forfeit(
         val player: Player,
         val ending: Ending,

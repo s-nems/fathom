@@ -1,17 +1,32 @@
-package io.github.snems.fathom.bot
+package io.github.snems.fathom.bot.shooting
 
+import io.github.snems.fathom.bot.CELL_COUNT
+import io.github.snems.fathom.bot.Candidate
+import io.github.snems.fathom.bot.CellSet
+import io.github.snems.fathom.bot.TimeBudget
 import kotlin.random.Random
 
-/** How the bot samples the fleets the opponent may have. */
-class SamplerSettings(
-    /** Fleets drawn for one shot. */
+/**
+ * How the bot samples the fleets the opponent may have.
+ */
+data class SamplerSettings(
+    /**
+     * Fleets drawn for one shot.
+     */
     val samples: Int = 2_000,
     /**
      * The chance the bot gives to the opponent having placed ship after ship at random. See [PlacingBelief].
      * Of the values measured, an even chance costs the least on the kind of layout it suits worst.
      */
     val sequentialChance: Double = 0.5,
-)
+) {
+    init {
+        require(samples >= 0) { "The number of fleets cannot be negative: $samples" }
+        require(sequentialChance in 0.0..1.0) {
+            "The chance of ship after ship has to be in 0.0..1.0, not $sequentialChance"
+        }
+    }
+}
 
 /**
  * Weighs a cell by how often it is occupied in random whole fleets that agree with every shot so far. Unlike
@@ -45,14 +60,20 @@ internal class FleetSampler(
         return weights
     }
 
-    /** Draws one fleet after another for the same shot, into the same buffers. */
+    /**
+     * Draws one fleet after another for the same shot, into the same buffers.
+     */
     private inner class Draw {
         private val hits: IntArray = waters.openHits()
 
-        /** Ship sizes afloat, largest first, each once. */
+        /**
+         * Ship sizes afloat, largest first, each once.
+         */
         private val sizes: IntArray = waters.afloat.distinct().toIntArray()
 
-        /** Number of ships afloat by size. */
+        /**
+         * Number of ships afloat by size.
+         */
         private val shipsAfloat =
             IntArray(Placements.LENGTH_BY_SIZE).also { count ->
                 waters.afloat.forEach { count[it]++ }
@@ -67,7 +88,9 @@ internal class FleetSampler(
                 Candidate.BY_SIZE.getValue(size).filter { waters.allows(it) && !waters.passesThroughHit(it) }
             }
 
-        /** By hit, then by ship size, the placements through that hit that leave some cell of the ship unhit. */
+        /**
+         * By hit, then by ship size, the placements through that hit that leave some cell of the ship unhit.
+         */
         private val throughHit: List<Array<Placements>> =
             hits.map { hit ->
                 Placements.bySize { size ->
@@ -77,18 +100,24 @@ internal class FleetSampler(
                 }
             }
 
-        /** The ships of the fleet drawn last. */
+        /**
+         * The ships of the fleet drawn last.
+         */
         val ships = ArrayList<Candidate>(waters.afloat.size)
 
         private val toDraw = IntArray(shipsAfloat.size)
         private val covered = CellSet()
         private val claimed = CellSet()
 
-        /** The placements to choose from at one step, and for a ship through a hit also the size of each. */
+        /**
+         * The placements to choose from at one step, and for a ship through a hit also the size of each.
+         */
         private val free = IntArray(Placements.MOST_OF_A_SIZE * Placements.SIZES.size)
         private val freeSize = IntArray(free.size)
 
-        /** Draws a fleet into [ships] and returns its weight, or 0 when the drawing ran into a dead end. */
+        /**
+         * Draws a fleet into [ships] and returns its weight, or 0 when the drawing ran into a dead end.
+         */
         fun nextFleet(): Double {
             ships.clear()
             covered.clear()

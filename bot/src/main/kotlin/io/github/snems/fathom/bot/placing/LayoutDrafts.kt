@@ -1,18 +1,34 @@
-package io.github.snems.fathom.bot
+package io.github.snems.fathom.bot.placing
 
+import io.github.snems.fathom.bot.CELL_COUNT
+import io.github.snems.fathom.bot.Candidate
+import io.github.snems.fathom.bot.CellSet
 import jd.mg.ships.tournament.api.ShipPlacement
 import kotlin.random.Random
 import kotlin.time.TimeMark
 
-/** How the bot lays out its fleet. */
-class LayoutPolicy(
-    /** Ships of at least this many cells are the long ones. Shorter ships go anywhere. */
+/**
+ * How the bot lays out its fleet.
+ */
+data class LayoutPolicy(
+    /**
+     * Ships of at least this many cells are the long ones. Shorter ships go anywhere.
+     */
     val longShipSize: Int = 3,
-    /** Chance that a long ship is laid along an edge of the board. */
+    /**
+     * Chance that a long ship is laid along an edge of the board.
+     */
     val edgeChance: Double = 0.8,
-    /** Layouts drawn before the one with the most free cells is kept. */
+    /**
+     * Layouts drawn before the one with the most free cells is kept.
+     */
     val drafts: Int = 20,
-)
+) {
+    init {
+        require(edgeChance in 0.0..1.0) { "The chance of an edge has to be in 0.0..1.0, not $edgeChance" }
+        require(drafts > 0) { "At least one layout has to be drawn, not $drafts" }
+    }
+}
 
 /**
  * Draws random layouts and keeps the best. A sunk ship shows the opponent that the cells sharing an edge with it
@@ -60,7 +76,8 @@ internal class LayoutDrafts(
         placed.forEach { claim(Candidate.of(it), taken, cautious) }
         val layout = placed.toMutableList()
         for (size in sizes) {
-            val fitting = Candidate.BY_SIZE.getValue(size).filter { !taken.overlaps(it.covered) && it.ship !in refused }
+            val candidates = Candidate.BY_SIZE[size] ?: return null
+            val fitting = candidates.filter { !taken.overlaps(it.covered) && it.ship !in refused }
             val favoursEdge = size >= policy.longShipSize && random.nextDouble() < policy.edgeChance
             val alongEdge = if (favoursEdge) fitting.filter { it.isAlongEdge } else emptyList()
             val choice = alongEdge.ifEmpty { fitting }.randomOrNull(random) ?: return null
@@ -70,7 +87,9 @@ internal class LayoutDrafts(
         return layout
     }
 
-    /** Marks the cells no later ship may cover. A cautious draft also keeps the corners around the ship free. */
+    /**
+     * Marks the cells no later ship may cover. A cautious draft also keeps the corners around the ship free.
+     */
     private fun claim(
         candidate: Candidate,
         taken: CellSet,
@@ -80,7 +99,9 @@ internal class LayoutDrafts(
         if (cautious) candidate.corners.forEach(taken::add)
     }
 
-    /** Cells that are neither part of a ship nor share an edge with one. */
+    /**
+     * Cells that are neither part of a ship nor share an edge with one.
+     */
     private fun freeCells(layout: List<ShipPlacement>): Int {
         val taken = CellSet()
         layout.forEach { taken.add(Candidate.of(it).claim) }

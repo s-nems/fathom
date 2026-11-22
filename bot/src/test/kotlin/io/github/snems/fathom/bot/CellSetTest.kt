@@ -16,7 +16,7 @@ class CellSetTest {
         cells.add(cell)
 
         // then
-        (0 until CELL_COUNT).filter { it in cells } shouldBe listOf(cell)
+        (0..<CELL_COUNT).filter { it in cells } shouldBe listOf(cell)
         cells.size shouldBe 1
     }
 
@@ -44,7 +44,9 @@ class CellSetTest {
     }
 
     private companion object {
-        /** A cell none of the rows above uses. */
+        /**
+         * A cell none of the rows above uses.
+         */
         const val NEIGHBOUR_OF_NONE = 40
     }
 }

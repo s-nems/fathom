@@ -1,10 +1,10 @@
-package io.github.snems.fathom.bot
+package io.github.snems.fathom.bot.shooting
 
 import io.github.snems.fathom.SampleFleets.ship
 import io.github.snems.fathom.board.Board
-import io.github.snems.fathom.board.FLEET_SHIP_SIZES
 import io.github.snems.fathom.board.cells
 import io.github.snems.fathom.board.edgeNeighbours
+import io.github.snems.fathom.bot.index
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.doubles.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
@@ -145,10 +145,14 @@ class PlacementDensityTest {
     private companion object {
         val FAR_CORNER = Position(9, 9)
 
-        /** One horizontal and one vertical placement for each of the ten ships of the fleet. */
+        /**
+         * One horizontal and one vertical placement for each of the ten ships of the fleet.
+         */
         const val CORNER_PLACEMENTS = 20.0
 
-        /** One horizontal and one vertical placement of the 5-cell ship. */
+        /**
+         * One horizontal and one vertical placement of the 5-cell ship.
+         */
         const val CARRIER_PLACEMENTS_IN_A_CORNER = 2.0
     }
 }

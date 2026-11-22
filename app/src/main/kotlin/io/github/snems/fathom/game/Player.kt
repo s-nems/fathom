@@ -1,6 +1,8 @@
 package io.github.snems.fathom.game
 
-/** One of the two sides of a game. */
+/**
+ * One of the two sides of a game.
+ */
 enum class Player {
     ONE,
     TWO,

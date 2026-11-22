@@ -7,7 +7,9 @@ import jd.mg.ships.tournament.api.Position
 import jd.mg.ships.tournament.api.ShipPlacement
 import jd.mg.ships.tournament.api.Shot
 
-/** A bot that answers from a script and records what the referee told it. */
+/**
+ * A bot that answers from a script and records what the referee told it.
+ */
 class ScriptedBot(
     placements: List<ShipPlacement> = COMPLETE,
     shots: List<Position> = Board.positions,
@@ -17,8 +19,7 @@ class ScriptedBot(
     private val placements = ArrayDeque(placements)
     private val shots = ArrayDeque(shots)
 
-    /** Arguments of each `placeShip` call: the fleet so far and the sizes still to place. */
-    val placementCalls = mutableListOf<Pair<List<ShipPlacement>, List<Int>>>()
+    val placementCalls = mutableListOf<PlacementCall>()
     val offeredShots = mutableListOf<List<Position>>()
     val results = mutableListOf<Shot>()
 
@@ -26,7 +27,7 @@ class ScriptedBot(
         ownFleet: List<ShipPlacement>,
         remainingShipSizes: List<Int>,
     ): ShipPlacement {
-        placementCalls += ownFleet to remainingShipSizes
+        placementCalls += PlacementCall(ownFleet, remainingShipSizes)
         beforeMove()
         return placements.removeFirst()
     }
@@ -42,3 +43,11 @@ class ScriptedBot(
         onResult()
     }
 }
+
+/**
+ * The arguments of one `placeShip` call: the fleet so far and the sizes still to place.
+ */
+data class PlacementCall(
+    val ownFleet: List<ShipPlacement>,
+    val remainingSizes: List<Int>,
+)

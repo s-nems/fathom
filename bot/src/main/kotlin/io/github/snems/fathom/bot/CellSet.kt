@@ -1,6 +1,8 @@
 package io.github.snems.fathom.bot
 
-/** A fixed set of board cells as two words of bits: [low] holds cells 0 to 63, [high] the rest. */
+/**
+ * A fixed set of board cells as two words of bits: [low] holds cells 0 to 63, [high] the rest.
+ */
 internal class Cells(
     cells: IntArray,
 ) {
@@ -8,7 +10,9 @@ internal class Cells(
     val high: Long = cells.fold(0L) { bits, cell -> bits or highBit(cell) }
 }
 
-/** A set of board cells that grows. As bits, "do these overlap" takes two operations. */
+/**
+ * A set of board cells that grows. As bits, "do these overlap" takes two operations.
+ */
 internal class CellSet {
     var low = 0L
         private set

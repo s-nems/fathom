@@ -6,9 +6,13 @@ import jd.mg.ships.tournament.api.Direction.VERTICAL
 import jd.mg.ships.tournament.api.Position
 import jd.mg.ships.tournament.api.ShipPlacement
 
-/** Ships and fleets shared by the tests. */
+/**
+ * Ships and fleets shared by the tests.
+ */
 object SampleFleets {
-    /** A complete legal fleet, largest ship first. */
+    /**
+     * A complete legal fleet, largest ship first.
+     */
     val COMPLETE: List<ShipPlacement> =
         listOf(
             ship(5, 0, 0, HORIZONTAL),
@@ -23,7 +27,9 @@ object SampleFleets {
             ship(2, 7, 9, HORIZONTAL),
         )
 
-    /** [COMPLETE] mirrored along the diagonal: another complete legal fleet, largest ship first. */
+    /**
+     * [COMPLETE] mirrored along the diagonal: another complete legal fleet, largest ship first.
+     */
     val TRANSPOSED: List<ShipPlacement> =
         listOf(
             ship(5, 0, 0, VERTICAL),
@@ -43,5 +49,5 @@ object SampleFleets {
         x: Int,
         y: Int,
         direction: Direction,
-    ) = ShipPlacement(size, Position(x, y), direction)
+    ): ShipPlacement = ShipPlacement(size, Position(x, y), direction)
 }

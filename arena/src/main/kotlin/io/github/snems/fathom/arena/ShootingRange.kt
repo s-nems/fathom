@@ -1,39 +1,52 @@
 package io.github.snems.fathom.arena
 
+import io.github.snems.fathom.arena.layouts.LayoutSource
+import io.github.snems.fathom.arena.layouts.SEED_STRIDE
+import io.github.snems.fathom.arena.shooters.Shooter
+import io.github.snems.fathom.arena.shooters.ShooterFactory
 import io.github.snems.fathom.game.Fleet
 import io.github.snems.fathom.game.FleetUnderFire
 import jd.mg.ships.tournament.api.ShipPlacement
+import jd.mg.ships.tournament.api.Shot
 import java.util.stream.IntStream
 import kotlin.random.Random
 
-/** Fixed fleets for shooters to sink, one after another. Every shooter meets the same fleets. */
+/**
+ * Fixed fleets for shooters to sink, one after another. Every shooter meets the same fleets.
+ */
 class ShootingRange(
     private val fleets: List<Fleet>,
     private val seed: Long,
 ) {
-    /** A range of [games] fleets drawn from [layouts]. */
     constructor(layouts: LayoutSource, games: Int, seed: Long) : this(
-        (0 until games).map { game -> fleetOf(layouts.layout(randomFor(seed, game, LAYOUT_STREAM))) },
+        (0..<games).map { game -> fleetOf(layouts.layout(randomFor(seed, game, LAYOUT_STREAM))) },
         seed,
     )
 
-    /** Shots a fresh shooter needs to sink each fleet, in the order of the fleets. */
-    fun shotsToSink(shooter: (Random) -> Shooter): IntArray =
-        IntStream
-            .range(0, fleets.size)
-            .parallel()
-            .map { game -> shotsToSink(shooter(randomFor(seed, game, SHOOTER_STREAM)), fleets[game]) }
-            .toArray()
+    /**
+     * Shots a fresh shooter needs to sink each fleet, in the order of the fleets.
+     */
+    fun shotsToSink(shooter: ShooterFactory): IntArray = shotsFired(shooter).map { it.size }.toIntArray()
 
-    private fun shotsToSink(
-        shooter: Shooter,
+    /**
+     * The shots a fresh shooter fires until each fleet is sunk, in the order of the fleets.
+     */
+    fun shotsFired(shooter: ShooterFactory): List<List<Shot>> =
+        IntStream.range(0, fleets.size)
+            .parallel()
+            .mapToObj { game -> sink(fleets[game], shooter(randomFor(seed, game, SHOOTER_STREAM))) }
+            .toList()
+
+    private fun sink(
         fleet: Fleet,
-    ): Int {
+        shooter: Shooter,
+    ): List<Shot> {
         val target = FleetUnderFire(fleet)
-        var shots = 0
+        val shots = mutableListOf<Shot>()
         while (!target.isSunk) {
-            shooter.onShotResult(target.receive(shooter.chooseShot(target.unshot())))
-            shots++
+            val shot = target.receive(shooter.chooseShot(target.unshot()))
+            shooter.onShotResult(shot)
+            shots += shot
         }
         return shots
     }

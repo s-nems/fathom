@@ -1,11 +1,10 @@
-package io.github.snems.fathom.arena
+package io.github.snems.fathom.arena.layouts
 
 import jd.mg.ships.tournament.api.Direction
 import jd.mg.ships.tournament.api.Position
 import jd.mg.ships.tournament.api.ShipPlacement
 import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.random.Random
 
 /**
  * Fleets as text, one per line, each ship as its size, `h` or `v`, x and y, such as `5h23`. The neural
@@ -19,6 +18,9 @@ object LayoutFile {
         Files.write(path, layouts.map { ships -> ships.joinToString(" ", transform = ::text) })
     }
 
+    /**
+     * @throws IllegalArgumentException if a line holds something that is not a ship
+     */
     fun read(path: Path): List<List<ShipPlacement>> =
         Files.readAllLines(path).filter { it.isNotBlank() }.map { line -> line.split(" ").map(::ship) }
 
@@ -26,17 +28,16 @@ object LayoutFile {
         "${ship.size}${LETTERS.getValue(ship.direction)}${ship.position.x}${ship.position.y}"
 
     private fun ship(text: String): ShipPlacement {
+        require(text.length == SHIP_LENGTH) { "Not a ship: $text" }
         val (size, letter, x, y) = text.toList()
-        val direction = LETTERS.entries.first { it.value == letter }.key
+        val direction = requireNotNull(DIRECTIONS[letter]) { "Not a ship: $text" }
         return ShipPlacement(size.digitToInt(), Position(x.digitToInt(), y.digitToInt()), direction)
     }
 
+    /**
+     * Characters of a ship: its size, its letter, x and y.
+     */
+    private const val SHIP_LENGTH = 4
     private val LETTERS = mapOf(Direction.HORIZONTAL to 'h', Direction.VERTICAL to 'v')
-}
-
-/** The fleets of a file, picked at random. */
-class FileLayouts(
-    private val layouts: List<List<ShipPlacement>>,
-) : LayoutSource {
-    override fun layout(random: Random): List<ShipPlacement> = layouts.random(random)
+    private val DIRECTIONS = LETTERS.entries.associate { (direction, letter) -> letter to direction }
 }

@@ -7,24 +7,28 @@ import jd.mg.ships.tournament.api.ShipPlacement
 import jd.mg.ships.tournament.api.Shot
 import jd.mg.ships.tournament.api.ShotResult
 
-/** A fleet being shot at. Remembers the shots it has received and answers each new one. */
+/**
+ * A fleet being shot at. Remembers the shots it has received and answers each new one.
+ */
 class FleetUnderFire(
     fleet: Fleet,
 ) {
     private val shipAt: Map<Position, ShipPlacement> =
-        fleet.ships.flatMap { ship -> ship.cells().map { it to ship } }.toMap()
+        buildMap { fleet.ships.forEach { ship -> ship.cells().forEach { put(it, ship) } } }
     private val shotAt = mutableSetOf<Position>()
 
-    /** Whether every cell of every ship has been hit. */
     val isSunk: Boolean get() = shotAt.containsAll(shipAt.keys)
 
-    /** Cells nobody has shot at yet, row by row. */
+    /**
+     * Cells nobody has shot at yet, row by row.
+     */
     fun unshot(): List<Position> = Board.positions.filterNot { it in shotAt }
 
-    /** Whether the cell is on the board and has not been shot at. */
     fun accepts(position: Position): Boolean = position in Board && position !in shotAt
 
-    /** @throws IllegalArgumentException if the board does not accept a shot at the cell */
+    /**
+     * @throws IllegalArgumentException if the board does not accept a shot at the cell
+     */
     fun receive(position: Position): Shot {
         require(accepts(position)) { "Cannot shoot at $position" }
         shotAt += position

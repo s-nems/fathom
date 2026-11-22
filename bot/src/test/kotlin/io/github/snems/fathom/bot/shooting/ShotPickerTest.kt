@@ -1,8 +1,12 @@
-package io.github.snems.fathom.bot
+package io.github.snems.fathom.bot.shooting
 
+import io.github.snems.fathom.bot.CELL_COUNT
+import io.github.snems.fathom.bot.FathomBot
+import io.github.snems.fathom.bot.TimeBudget
+import io.github.snems.fathom.bot.index
+import io.github.snems.fathom.bot.untimedBot
 import io.github.snems.fathom.game.Fleet
 import io.github.snems.fathom.game.FleetUnderFire
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.shouldBe
 import jd.mg.ships.tournament.api.Position
@@ -22,7 +26,7 @@ class ShotPickerTest {
         val picker = ShotPicker(Random(SEED), listOf(heavyAtOrigin, heavyNextToOrigin))
 
         // when
-        val shot = picker.pick(listOf(ORIGIN, NEXT_TO_ORIGIN, FAR))
+        val shot = picker.pick(listOf(ORIGIN, NEXT_TO_ORIGIN, FAR))?.shot
 
         // then
         shot shouldBe ORIGIN
@@ -34,7 +38,7 @@ class ShotPickerTest {
         val picker = ShotPicker(Random(SEED), listOf(heavyAtOrigin, heavyNextToOrigin))
 
         // when
-        val shot = picker.pick(listOf(NEXT_TO_ORIGIN, FAR))
+        val shot = picker.pick(listOf(NEXT_TO_ORIGIN, FAR))?.shot
 
         // then
         shot shouldBe NEXT_TO_ORIGIN
@@ -46,28 +50,44 @@ class ShotPickerTest {
         val picker = ShotPicker(Random(SEED), listOf(silent))
 
         // when
-        val shot = picker.pick(listOf(FAR))
+        val shot = picker.pick(listOf(FAR))?.shot
 
         // then
         shot shouldBe FAR
     }
 
     @Test
+    fun shouldTellTheSourceAndTheWeightsItPickedFrom() {
+        // given
+        val picker = ShotPicker(Random(SEED), listOf(silent, heavyNextToOrigin))
+
+        // when
+        val pick = checkNotNull(picker.pick(listOf(ORIGIN, NEXT_TO_ORIGIN)))
+
+        // then
+        pick.source shouldBe heavyNextToOrigin
+        checkNotNull(pick.weights).indexOfFirst { it > 0.0 } shouldBe NEXT_TO_ORIGIN.index()
+    }
+
+    @Test
     fun shouldBreakTiesAtRandom() {
         // when
-        val shots = List(PICKERS) { seed -> ShotPicker(Random(seed), listOf(silent)).pick(listOf(ORIGIN, FAR)) }
+        val shots = List(PICKERS) { seed -> ShotPicker(Random(seed), listOf(silent)).pick(listOf(ORIGIN, FAR))?.shot }
 
         // then
         shots.toSet() shouldBe setOf(ORIGIN, FAR)
     }
 
     @Test
-    fun shouldThrowWhenNoOfferedCellIsOnTheBoard() {
+    fun shouldPickNothingWhenNoOfferedCellIsOnTheBoard() {
         // given
         val picker = ShotPicker(Random(SEED), listOf(heavyAtOrigin))
 
-        // when, then
-        shouldThrow<NoSuchElementException> { picker.pick(listOf(Position(-1, 0))) }
+        // when
+        val pick = picker.pick(listOf(Position(-1, 0)))
+
+        // then
+        pick shouldBe null
     }
 
     @Test
@@ -84,7 +104,7 @@ class ShotPickerTest {
 
             // when
             while (!target.isSunk) {
-                waters.record(target.receive(picker.pick(target.unshot())))
+                waters.record(target.receive(checkNotNull(picker.pick(target.unshot())).shot))
                 shots++
             }
 
