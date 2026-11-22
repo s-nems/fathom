@@ -8,19 +8,21 @@ import io.github.snems.fathom.game.Fleet
 import io.github.snems.fathom.game.FleetUnderFire
 import jd.mg.ships.tournament.api.ShipPlacement
 import jd.mg.ships.tournament.api.Shot
-import java.util.stream.IntStream
 import kotlin.random.Random
 
 /**
- * Fixed fleets for shooters to sink, one after another. Every shooter meets the same fleets.
+ * Fixed fleets for shooters to sink, one after another. Every shooter meets the same fleets. The fleets are the
+ * games of a run from [firstGame] on, and a game is the same whichever part of the run it is played in.
  */
 class ShootingRange(
     private val fleets: List<Fleet>,
     private val seed: Long,
+    private val firstGame: Int = 0,
 ) {
-    constructor(layouts: LayoutSource, games: Int, seed: Long) : this(
-        (0..<games).map { game -> fleetOf(layouts.layout(randomFor(seed, game, LAYOUT_STREAM))) },
+    constructor(layouts: LayoutSource, games: Int, seed: Long, firstGame: Int = 0) : this(
+        List(games) { game -> fleetOf(layouts.layout(randomFor(seed, firstGame + game, LAYOUT_STREAM))) },
         seed,
+        firstGame,
     )
 
     /**
@@ -32,10 +34,9 @@ class ShootingRange(
      * The shots a fresh shooter fires until each fleet is sunk, in the order of the fleets.
      */
     fun shotsFired(shooter: ShooterFactory): List<List<Shot>> =
-        IntStream.range(0, fleets.size)
-            .parallel()
-            .mapToObj { game -> sink(fleets[game], shooter(randomFor(seed, game, SHOOTER_STREAM))) }
-            .toList()
+        inParallel(fleets.size) { game ->
+            sink(fleets[game], shooter(randomFor(seed, firstGame + game, SHOOTER_STREAM)))
+        }
 
     private fun sink(
         fleet: Fleet,

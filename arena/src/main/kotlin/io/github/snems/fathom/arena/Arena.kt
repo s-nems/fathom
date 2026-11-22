@@ -71,7 +71,7 @@ private fun printShotsAt(file: Path) {
     log.log(Level.INFO, "Mean shots to sink the fleet, 95% interval, ${fleets.size} fleets of $file")
     ShooterKind.entries.forEach { shooter ->
         val shots = range.shotsToSink(shooter.against(FileLayouts(fleets), DEFAULT_SEED))
-        log.log(Level.INFO, row(shooter.label, listOf(shots.estimate().toString())))
+        log.log(Level.INFO, row(shooter.label, listOf(shots.estimate().formatted())))
         if (shooter == ShooterKind.FATHOM) Files.write(Path.of("$file$SHOTS_SUFFIX"), shots.map(Int::toString))
     }
 }
@@ -94,7 +94,7 @@ private fun printShotTable(
     log.log(Level.INFO, "Mean shots to sink the fleet, 95% interval, $games games per cell, seed $seed")
     log.log(Level.INFO, row("shooter \\ layouts", layouts.map { it.label }))
     shots.forEach { (shooter, byLayout) ->
-        log.log(Level.INFO, row(shooter.label, byLayout.values.map { it.estimate().toString() }))
+        log.log(Level.INFO, row(shooter.label, byLayout.values.map { it.estimate().formatted() }))
     }
 
     val bot = ShooterKind.FATHOM

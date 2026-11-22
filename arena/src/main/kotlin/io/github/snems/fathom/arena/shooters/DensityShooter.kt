@@ -48,7 +48,7 @@ class DensityShooter(
                 val hits = cells.count { it in openHits }
                 if (hits == cells.size || (openHits.isNotEmpty() && hits == 0)) continue
                 val weight = prior(placement.ship) * weightOf(hits)
-                cells.forEach { if (it !in openHits) density.merge(it, weight, Long::plus) }
+                cells.forEach { if (it !in openHits) density[it] = (density[it] ?: 0L) + weight }
             }
         }
         return density

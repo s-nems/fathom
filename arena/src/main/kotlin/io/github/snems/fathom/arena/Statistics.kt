@@ -1,6 +1,5 @@
 package io.github.snems.fathom.arena
 
-import java.util.Locale
 import kotlin.math.sqrt
 
 private const val DRAW_SHARE = 0.5
@@ -22,8 +21,6 @@ class Estimate(
      * Half the width of the 95% confidence interval of the mean.
      */
     val margin: Double = NORMAL_95 * deviation / sqrt(values.size.toDouble())
-
-    override fun toString(): String = "%.2f ± %.2f".format(Locale.ROOT, mean, margin)
 
     private companion object {
         const val NORMAL_95 = 1.96

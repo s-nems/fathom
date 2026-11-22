@@ -106,7 +106,7 @@ class FathomBot(
 
     private fun lastResort(size: Int) = ShipPlacement(size, TOP_LEFT, Direction.HORIZONTAL)
 
-    private fun nameOf(source: ShotWeights?): String = source?.javaClass?.simpleName ?: NO_SOURCE
+    private fun nameOf(source: ShotWeights?): String = source?.let { it::class.simpleName } ?: NO_SOURCE
 
     private companion object {
         const val LOGGER_NAME = "fathom"

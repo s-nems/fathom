@@ -1,7 +1,7 @@
 package io.github.snems.fathom.arena.layouts
 
+import io.github.snems.fathom.arena.inParallel
 import jd.mg.ships.tournament.api.ShipPlacement
-import java.util.stream.IntStream
 import kotlin.random.Random
 
 /**
@@ -22,8 +22,4 @@ fun interface LayoutSource {
 fun LayoutSource.draw(
     count: Int,
     seed: Long,
-): List<List<ShipPlacement>> =
-    IntStream.range(0, count)
-        .parallel()
-        .mapToObj { index -> layout(Random(seed * SEED_STRIDE + index)) }
-        .toList()
+): List<List<ShipPlacement>> = inParallel(count) { index -> layout(Random(seed * SEED_STRIDE + index)) }

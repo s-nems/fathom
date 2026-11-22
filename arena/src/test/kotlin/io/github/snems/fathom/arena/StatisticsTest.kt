@@ -14,7 +14,7 @@ class StatisticsTest {
         // then: the deviation of the sample is the root of 8/3, and the margin is 1.96 of it over the root of 4
         estimate.mean shouldBe 50.0
         estimate.margin shouldBe (1.6003 plusOrMinus ROUNDING)
-        estimate.toString() shouldBe "50.00 ± 1.60"
+        estimate.formatted() shouldBe "50.00 ± 1.60"
     }
 
     @Test
