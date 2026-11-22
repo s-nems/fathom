@@ -5,7 +5,7 @@ import kotlin.random.Random
 import kotlin.time.TimeMark
 
 /** How the bot lays out its fleet. */
-internal class LayoutPolicy(
+class LayoutPolicy(
     /** Ships of at least this many cells are the long ones. Shorter ships go anywhere. */
     val longShipSize: Int = 3,
     /** Chance that a long ship is laid along an edge of the board. */

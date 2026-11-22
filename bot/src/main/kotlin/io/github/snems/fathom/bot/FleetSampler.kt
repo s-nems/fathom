@@ -3,7 +3,7 @@ package io.github.snems.fathom.bot
 import kotlin.random.Random
 
 /** How the bot samples the fleets the opponent may have. */
-internal class SamplerSettings(
+class SamplerSettings(
     /** Fleets drawn for one shot. */
     val samples: Int = 2_000,
     /**

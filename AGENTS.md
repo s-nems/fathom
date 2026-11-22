@@ -22,17 +22,17 @@ Run the formatter and the build as two invocations.
 
 | Path | Content |
 |---|---|
-| `src/bot/kotlin` | What the tournament copies: the provided `Bot.kt`, `board` (rules), `bot` (the bot) |
-| `src/main/kotlin` | `game` (referee), `app` (one game and its log) |
-| `src/arena/kotlin` | Opponents and measurements, not part of the program |
-| `src/test/kotlin` | Tests |
+| `bot` | Module the tournament copies: the provided `Bot.kt`, `board` (rules), `bot` (the bot) |
+| `app` | Module with `game` (referee) and `app` (one game and its log). Depends on `bot` |
+| `arena` | Module with opponents and measurements, not part of the program. Depends on `bot` and `app` |
+| `buildSrc` | `fathom-module`, the build settings every module shares |
 | `experiments/neural` | A neural shooter and placer in Python, with its own README. Not part of the build |
 | `measurements` | Outputs of the arena behind the numbers in the README |
 
 ## Rules of the code
 
 - `Bot.kt` stays byte for byte as provided.
-- `src/bot/kotlin` uses the Kotlin standard library only. It compiles at language level 2.1 against the JDK 17
+- `bot/src/main` uses the Kotlin standard library only. It compiles at language level 2.1 against the JDK 17
   API, and the build fails on anything newer.
 - The bot never throws. It answers within the rules whenever its arguments allow that. It keeps no state
   between games.
@@ -46,8 +46,8 @@ Run the formatter and the build as two invocations.
 - Plain `@Test` methods named `should...`, with `// given`, `// when`, `// then`.
 - Parameterised tests list their rows as literals.
 - Sample ships come from `SampleFleets`, scripted players from `ScriptedBot`.
-- `ReplayingLogTest` replays every log in `src/test/resources/logs` through the referee and compares the log
-  written with the original.
+- `ReplayingLogTest` replays every log in `app/src/test/resources/logs` through the referee and compares the
+  log written with the original.
 
 ## Working here
 

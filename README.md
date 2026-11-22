@@ -28,12 +28,12 @@ Compiles with warnings as errors, checks the formatting, runs the tests and writ
 | | |
 |---|---|
 | Class | `io.github.snems.fathom.bot.FathomBot` |
-| Sources to copy | `src/bot/kotlin/io/github/snems/fathom` |
+| Sources to copy | `bot/src/main/kotlin` |
 | Dependencies | Kotlin standard library |
 | Compiled for | Kotlin language level 2.1, JDK 17 API |
 
-`src/bot/kotlin` is a separate source set with its own compiler settings, so the build fails if the bot uses a
-library, a newer language feature or a newer JDK API. It also holds the provided `Bot.kt`, unchanged.
+`bot` is a Gradle module without dependencies and with its own compiler settings, so the build fails if the
+bot uses a library, a newer language feature or a newer JDK API. It also holds the provided `Bot.kt`, unchanged.
 
 The bot has a public constructor without arguments, keeps no state between games and starts no threads.
 
@@ -149,14 +149,23 @@ The limit is 500 ms.
 
 ## Source tree
 
+Three Gradle modules, each with its code in `src/main/kotlin` and its tests in `src/test/kotlin`. `app` depends
+on `bot`, `arena` on both.
+
+| Module | Package | Content |
+|---|---|---|
+| `bot` | `board` | Board geometry and the rules a fleet has to keep |
+| `bot` | `bot` | The bot |
+| `app` | `game` | The referee: placement, turns, illegal moves, time limit |
+| `app` | `app` | `main` and the log writer |
+| `arena` | `arena` | Baseline shooters, layout sources and the shooting range |
+
+Outside the modules:
+
 | Path | Content |
 |---|---|
-| `src/bot/kotlin/.../board` | Board geometry and the rules a fleet has to keep |
-| `src/bot/kotlin/.../bot` | The bot |
-| `src/main/kotlin/.../game` | The referee: placement, turns, illegal moves, time limit |
-| `src/main/kotlin/.../app` | `main` and the log writer |
-| `src/arena/kotlin` | Baseline shooters, layout sources and the shooting range |
-| `src/test/kotlin` | Tests |
+| `buildSrc` | Build settings the modules share |
+| `measurements` | Outputs of the arena behind the numbers above |
 | `experiments/neural` | A neural shooter and placer in Python, outside the build |
 
 ## Assumptions

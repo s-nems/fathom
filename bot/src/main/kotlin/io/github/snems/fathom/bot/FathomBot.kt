@@ -19,7 +19,7 @@ import kotlin.time.TimeSource
  * An exception would forfeit the game. So when the referee passes something no rule allows, such as an empty
  * list, the bot answers with a last resort instead of throwing.
  */
-class FathomBot internal constructor(
+class FathomBot(
     random: Random,
     layoutPolicy: LayoutPolicy = LayoutPolicy(),
     samplerSettings: SamplerSettings = SamplerSettings(),
