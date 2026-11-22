@@ -25,5 +25,5 @@ fun main() {
     Files.newBufferedWriter(log).use { out ->
         Game(FathomBot(), FathomBot(), firstShooter = Player.entries.random(), GameLogWriter(out, clock)).play()
     }
-    println("Game log written to $log")
+    println("Game log written to ${log.toAbsolutePath()}")
 }
