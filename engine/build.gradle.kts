@@ -38,7 +38,6 @@ kotlin {
             kotlin.srcDir("../app/src/main/kotlin")
             kotlin.srcDir("../arena/src/main/kotlin")
             kotlin.exclude(
-                "io/github/snems/fathom/bot/reporting/BotLog.kt",
                 "io/github/snems/fathom/app/**",
                 "io/github/snems/fathom/arena/Arena.kt",
                 "io/github/snems/fathom/arena/EstimateFormat.kt",

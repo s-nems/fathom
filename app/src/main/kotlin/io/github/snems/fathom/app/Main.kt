@@ -1,7 +1,6 @@
 package io.github.snems.fathom.app
 
 import io.github.snems.fathom.bot.FathomBot
-import io.github.snems.fathom.bot.reporting.BotLog
 import io.github.snems.fathom.game.Game
 import io.github.snems.fathom.game.Player
 import java.nio.file.Files

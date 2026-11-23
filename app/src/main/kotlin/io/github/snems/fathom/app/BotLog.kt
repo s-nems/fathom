@@ -1,5 +1,6 @@
-package io.github.snems.fathom.bot.reporting
+package io.github.snems.fathom.app
 
+import io.github.snems.fathom.bot.reporting.BotEvent
 import io.github.snems.fathom.bot.reporting.BotEvent.Failed
 import io.github.snems.fathom.bot.reporting.BotEvent.LastResortShip
 import io.github.snems.fathom.bot.reporting.BotEvent.LastResortShot
@@ -7,6 +8,7 @@ import io.github.snems.fathom.bot.reporting.BotEvent.ShipPlaced
 import io.github.snems.fathom.bot.reporting.BotEvent.ShipRefused
 import io.github.snems.fathom.bot.reporting.BotEvent.ShotChosen
 import io.github.snems.fathom.bot.reporting.BotEvent.ShotRefused
+import io.github.snems.fathom.bot.reporting.BotObserver
 import java.lang.System.Logger
 import java.lang.System.Logger.Level.ERROR
 import java.lang.System.Logger.Level.INFO

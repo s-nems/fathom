@@ -79,6 +79,6 @@ Check: `./gradlew build` after each change. Then I ran the game and read the cod
 | What I questioned | Decision |
 |---|---|
 | The field `unanswered` guessed a refused shot from a result that never came | Replaced. A shot that is offered again was refused. The existing test passed unchanged |
-| Failures of the bot's own code were swallowed | Changed. The bot reports every answer, refusal and failure to an observer. `BotLog` writes them to the logger of the JDK, so the bot still needs no library |
+| Failures of the bot's own code were swallowed | Changed. The bot reports every answer, refusal and failure to an observer. `BotLog` in `app` writes them to the logger of the JDK, so the bot needs nothing but the standard library |
 | The agent kept `println` for the tables of the arena | Rejected. Everything goes through a logger |
 | A separate reviewer got 106,000 warnings from the bot under hostile input | Changed. The tournament bot reports nothing unless it is given an observer |

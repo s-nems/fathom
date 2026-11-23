@@ -1,4 +1,4 @@
-package io.github.snems.fathom.bot.reporting
+package io.github.snems.fathom.app
 
 import io.github.snems.fathom.bot.reporting.BotEvent.Failed
 import io.github.snems.fathom.bot.reporting.BotEvent.LastResortShip
