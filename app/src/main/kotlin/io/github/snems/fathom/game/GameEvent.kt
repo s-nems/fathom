@@ -28,7 +28,7 @@ sealed interface GameEvent {
      */
     data class BotFailed(
         val player: Player,
-        val error: Exception?,
+        val error: Throwable?,
     ) : GameEvent
 
     /**

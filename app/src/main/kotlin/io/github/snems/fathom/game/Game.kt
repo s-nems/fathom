@@ -19,7 +19,8 @@ import kotlin.time.measureTimedValue
 /**
  * One game between two bots, refereed by the tournament rules: both place their fleets, then they shoot in turns
  * until one fleet is sunk. A bot that throws or answers illegally is asked again. It forfeits after three such
- * answers in a row, or after one call that takes longer than the time limit.
+ * answers in a row, or after one call that takes longer than the time limit. Whatever a bot throws, an error
+ * such as a stack overflow included, counts as its own failure and not as one of the referee.
  */
 class Game(
     playerOne: Bot,
@@ -85,12 +86,12 @@ class Game(
         question: Bot.() -> T,
     ): T {
         repeat(ILLEGAL_MOVES_TO_FORFEIT) {
-            var error: Exception? = null
+            var error: Throwable? = null
             val (answer, time) =
                 timeSource.measureTimedValue {
                     try {
                         seatOf(player).bot.question()
-                    } catch (thrown: Exception) {
+                    } catch (thrown: Throwable) {
                         error = thrown
                         null
                     }
@@ -113,7 +114,7 @@ class Game(
             timeSource.measureTime {
                 try {
                     seatOf(player).bot.onShotResult(shot)
-                } catch (thrown: Exception) {
+                } catch (thrown: Throwable) {
                     observer.on(BotFailed(player, thrown))
                 }
             }

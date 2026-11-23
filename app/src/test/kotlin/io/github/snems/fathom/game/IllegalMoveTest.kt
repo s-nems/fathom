@@ -153,6 +153,40 @@ class IllegalMoveTest {
     }
 
     @Test
+    fun shouldCountAnErrorThrownByABotAsItsIllegalMove() {
+        // given
+        val overflowing = ScriptedBot(beforeMove = { throw StackOverflowError() })
+        val game = Game(overflowing, ScriptedBot(), Player.ONE, observer = events::add)
+
+        // when
+        val result = game.play()
+
+        // then
+        result.winner shouldBe Player.TWO
+        result.ending shouldBe ILLEGAL_MOVES
+        val failed = events.filterIsInstance<BotFailed>()
+        failed shouldHaveSize Game.ILLEGAL_MOVES_TO_FORFEIT
+        failed.forEach { it.error.shouldBeInstanceOf<StackOverflowError>() }
+    }
+
+    @Test
+    fun shouldCarryOnWhenTakingAShotResultFailsWithAnError() {
+        // given
+        val careless = ScriptedBot(shots = everyShipCell, onResult = { throw StackOverflowError() })
+        val game = Game(careless, ScriptedBot(), Player.ONE, observer = events::add)
+
+        // when
+        val result = game.play()
+
+        // then
+        result.winner shouldBe Player.ONE
+        result.ending shouldBe FLEET_SUNK
+        val failed = events.filterIsInstance<BotFailed>()
+        failed shouldHaveSize everyShipCell.size
+        failed.forEach { it.error.shouldBeInstanceOf<StackOverflowError>() }
+    }
+
+    @Test
     fun shouldCarryOnWhenTakingAShotResultThrows() {
         // given
         val careless = ScriptedBot(shots = everyShipCell, onResult = { error("cannot take it") })
