@@ -15,6 +15,9 @@ log, and a bot for a tournament run by someone else's engine.
 | Longest calls of the bot | `./gradlew arena --args="time"`, add `-Pinterpreted` to turn the JIT compiler off |
 | Write fleets of a layout source | `./gradlew arena --args="layouts fathom 1000 1 fleets.txt"` |
 | Shoot at fleets from a file | `./gradlew arena --args="shots fleets.txt"` |
+| Build the engine for the browser | `./gradlew :engine:wasm` |
+| Run the studio page | `pnpm install && pnpm engine && pnpm dev` in `web` |
+| Test the studio page | `pnpm test` in `web` |
 
 Run the formatter and the build as two invocations.
 
@@ -25,6 +28,8 @@ Run the formatter and the build as two invocations.
 | `bot` | Module the tournament copies: the provided `Bot.kt`, `board` (rules), `bot` (the bot) |
 | `app` | Module with `game` (referee) and `app` (one game and its log). Depends on `bot` |
 | `arena` | Module with opponents and measurements, not part of the program. Depends on `bot` and `app` |
+| `engine` | Module that compiles the sources of the three above, and its own, for the JVM and for WebAssembly, with its own README. The files it leaves out are listed in its build script |
+| `web` | The studio: a page in React that calls the engine in the browser. Not part of the Gradle build |
 | `experiments/neural` | A neural shooter and placer in Python, with its own README. Not part of the build |
 | `measurements` | Outputs of the arena behind the numbers in the README |
 
@@ -37,6 +42,9 @@ Run the formatter and the build as two invocations.
   between games.
 - `Game` knows nothing about logs or wall-clock time. It reports events to an observer.
 - Randomness and time are passed in, so every test is deterministic. Tests build the bot with `untimedBot`.
+- `engine` compiles the sources of `bot`, `app/.../game` and `arena` for the browser too, so they and
+  `engine/src/commonMain` are common Kotlin: no `java.*`, no JVM annotations. Code of the three modules that
+  needs the JVM goes into a file of its own, listed as left out in `engine/build.gradle.kts`.
 - No literal with a meaning stays unnamed.
 - Enum constants and nested types are imported: `INFO`, not `Level.INFO`. `Player.ONE` and `Player.TWO` keep
   their type, because the bare word says too little.

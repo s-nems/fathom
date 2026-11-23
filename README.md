@@ -7,10 +7,13 @@ Battleships in Kotlin: a bot for a tournament, and a program that plays one game
 | `bot` | The tournament bot and the rules of the board |
 | `app` | The referee and the program that plays one game |
 | `arena` | Other shooters and layouts to measure the bot against |
+| `engine` | The same game compiled to WebAssembly, with what the studio page shows |
+| `web` | A page to run the arena, replay games and play against the bot. It runs the engine in the browser and needs no server |
 | `measurements` | Outputs of the arena behind the numbers below, and the tuning |
 | `experiments/neural` | A neural shooter and placer in Python, outside the build |
 
-`bot`, `app` and `arena` are Gradle modules. `app` uses `bot`, `arena` uses both.
+`bot`, `app`, `arena` and `engine` are Gradle modules. `app` uses `bot`, `arena` uses both, and `engine`
+compiles the sources of all three next to its own.
 
 ## Commands
 
@@ -20,6 +23,8 @@ Battleships in Kotlin: a bot for a tournament, and a program that plays one game
 | `./gradlew build` | Compiles, checks the formatting, runs the tests, writes coverage to `build/reports/kover/html` |
 | `./gradlew arena --args="1000 1"` | Measures shooters on 1000 fleets per layout, seed 1 |
 | `./gradlew arena --args="time"` | Prints the longest calls of the bot |
+| `./gradlew :engine:wasm` | Builds the engine for the browser, see `engine/README.md` |
+| `pnpm install && pnpm engine && pnpm dev` in `web` | Serves the studio page, see `web/README.md` |
 
 Gradle needs JDK 17 or newer to start. The build uses JDK 25 and downloads it when the machine has none.
 
