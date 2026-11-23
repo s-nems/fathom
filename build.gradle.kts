@@ -4,6 +4,8 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
     alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.kover)
     alias(libs.plugins.spotless)
 }
@@ -13,7 +15,9 @@ val javaVersion =
         .get()
         .toInt()
 
-subprojects {
+val jvmModules = subprojects.filter { it.name != "engine" }
+
+configure(jvmModules) {
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jetbrains.kotlinx.kover")
 

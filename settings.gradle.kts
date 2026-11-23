@@ -11,4 +11,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "fathom"
 
-include("bot", "app", "arena")
+include("bot", "app", "arena", "engine")
