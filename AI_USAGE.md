@@ -1,7 +1,8 @@
 # AI usage
 
-Agent: Claude Code with the Fable 5.2 as orchestrator and Opus 5.5 model as worker subagents. The main session orchestrated: it started separate agents
-for research and for reviews and wrote their briefs. They had no view of the main conversation.
+Agent: Claude Code, with Fable 5.2 as the orchestrator and Opus 5.5 as the model of the worker subagents. The
+main session orchestrated: it started separate agents for research and for reviews and wrote their briefs.
+They had no view of the main conversation.
 
 I decided the scope, the design and what was accepted. A step counted as done after a green build, a review by
 a separate agent and, for a change to how the bot plays, a measurement in the arena.

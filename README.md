@@ -2,6 +2,12 @@
 
 Battleships in Kotlin: a bot for a tournament, and a program that plays one game and writes its log.
 
+| What | Where |
+|---|---|
+| Play one game and write its log | `./gradlew run` |
+| Class of the bot | `io.github.snems.fathom.bot.FathomBot` |
+| Sources to copy into the tournament | Everything in `bot/src/main/kotlin` |
+
 Play against the bot, replay games and run the arena in the browser at
 **[fathom.quickdev.pl](https://fathom.quickdev.pl)**.
 
