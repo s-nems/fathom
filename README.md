@@ -2,6 +2,11 @@
 
 Battleships in Kotlin: a bot for a tournament, and a program that plays one game and writes its log.
 
+Play against the bot, replay games and run the arena in the browser at
+**[fathom.quickdev.pl](https://fathom.quickdev.pl)**.
+
+[![The studio: the bot hunting a fleet on the home page](docs/studio.png)](https://fathom.quickdev.pl)
+
 | Directory | Content |
 |---|---|
 | `bot` | The tournament bot and the rules of the board |
