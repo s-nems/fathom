@@ -1,0 +1,403 @@
+/*
+ * Play: the board is the centre of the screen and as tall as the window allows. Two columns from 761 px up,
+ * one below. Up to 980 px the side column is narrower and the board also gives way to it.
+ */
+.play {
+  /* What the top bar, the head and the frame of the panel take of the height of the window. */
+  --play-chrome: 300px;
+  --play-board-least: 420px;
+  --play-board-most: 660px;
+  /* The width the board may take. Only a narrow window limits it. */
+  --play-room: var(--play-board-most);
+  --play-board: clamp(
+    var(--play-board-least),
+    min(calc(100vh - var(--play-chrome)), var(--play-room)),
+    var(--play-board-most)
+  );
+  --play-side: 380px;
+  --play-gap: 20px;
+  --play-width: calc(var(--play-board) + var(--play-side) + var(--play-gap));
+  --tray-cell: 20px;
+}
+
+/* A game under way leaves room for the line that says whose turn it is. */
+.play[data-stage="battle"] {
+  --play-chrome: 290px;
+}
+
+/* A heading or line that takes the focus when the stage changes is not a control, so it shows no ring. */
+.play [tabindex="-1"]:focus {
+  outline: none;
+}
+
+.play-steps {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--faint);
+  font: 700 12px var(--sans);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.play-steps-current {
+  color: var(--accent);
+}
+
+.play-steps-line {
+  width: 22px;
+  height: 1px;
+  background: var(--line-strong);
+}
+
+/* Placing the fleet */
+.play-place {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "fleet" "board" "start";
+  gap: 16px;
+  align-items: start;
+}
+
+.play-place-board {
+  grid-area: board;
+}
+
+.play-place-fleet {
+  grid-area: fleet;
+}
+
+.play-place-start {
+  grid-area: start;
+}
+
+.play-place-hint {
+  padding: 0 16px 14px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.play-place-go {
+  display: flex;
+  align-items: center;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+}
+
+.play-tray {
+  display: grid;
+  gap: 8px;
+}
+
+.play-tray button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--line);
+  background: var(--raised);
+  text-align: left;
+  min-width: 0;
+}
+
+.play-tray button:hover:enabled {
+  background: var(--hover);
+}
+
+.play-tray button[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.play-tray .play-tray-done {
+  background: none;
+  color: var(--muted);
+  cursor: default;
+}
+
+.play-tray-hull {
+  flex: none;
+  box-sizing: content-box;
+  display: flex;
+  align-items: center;
+  height: 22px;
+  padding: 3px 5px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--ship-line) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ship-line) 40%, transparent);
+}
+
+.play-tray-hull img,
+.play-tray-hull i {
+  display: block;
+  width: calc(var(--cells) * var(--tray-cell));
+  height: auto;
+  max-height: 100%;
+}
+
+/* A ship size without a deck plan is a plain bar. */
+.play-tray-hull i {
+  height: 12px;
+  border-radius: 3px;
+  background: var(--ship-line);
+}
+
+.play-tray-done .play-tray-hull {
+  opacity: var(--dimmed);
+}
+
+.play-tray-name {
+  margin-left: auto;
+}
+
+.play-tray-count {
+  min-width: 62px;
+  text-align: right;
+  color: var(--muted);
+  font: 12px var(--mono);
+  white-space: nowrap;
+}
+
+.play-setup {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 14px;
+  align-items: center;
+}
+
+.play-setup .labelled-inline {
+  display: contents;
+}
+
+.play-setup .seg {
+  justify-self: start;
+}
+
+/* The battle */
+.play-turn {
+  display: flex;
+  align-items: center;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  font-weight: 500;
+}
+
+.play-turn-shot {
+  margin-left: auto;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.play .alert {
+  margin-bottom: 16px;
+}
+
+.play-place-start .alert {
+  margin-bottom: 0;
+}
+
+.play-battle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.play-feed {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+
+.play-feed li {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.play-feed-number {
+  flex: none;
+  width: 22px;
+  color: var(--faint);
+  font: 12px var(--mono);
+  text-align: right;
+}
+
+/* The review */
+.play-result {
+  display: flex;
+  align-items: center;
+  gap: 16px 40px;
+  flex-wrap: wrap;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+}
+
+.play-result h2 {
+  font: var(--display-weight) 30px/1.1 var(--sans);
+  letter-spacing: var(--display-track);
+  margin: 8px 0 6px;
+}
+
+.play-result p {
+  color: var(--muted);
+  max-width: 52ch;
+}
+
+.play-result-ship {
+  width: 190px;
+  margin: -6px 0;
+}
+
+.play-result-wreck {
+  width: 124px;
+  margin: -6px 0;
+}
+
+.play-result-stats {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 10px 28px;
+  margin: 0;
+}
+
+.play-result-stats dd {
+  margin: 5px 0 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.play-result-again {
+  margin-left: auto;
+}
+
+@media (min-width: 761px) and (max-width: 980px) {
+  .play {
+    --play-side-least: 280px;
+    --play-gap: 16px;
+    --play-board-least: 320px;
+    --play-room: calc(100vw - 2 * var(--gutter) - var(--play-gap) - var(--play-side-least));
+    --tray-cell: 14px;
+  }
+
+  /* The own waters and the last shots share the height of the enemy waters. */
+  .play-battle .stack {
+    gap: 12px;
+  }
+
+  .play-battle .stack .pad {
+    padding: 12px;
+  }
+
+  .play-battle .stack svg.board {
+    max-width: var(--play-own-board);
+    margin-inline: auto;
+  }
+
+  .play[data-stage="battle"] {
+    /* What the last shots and the frames of both panels take of the height of the enemy waters. */
+    --play-feed: 250px;
+    --play-own-board: calc(var(--play-board) - var(--play-feed));
+  }
+}
+
+/* One column on a window wider than a phone: the boards stop growing, or one would fill the screen. */
+@media (min-width: 621px) and (max-width: 760px) {
+  .play {
+    --play-board-least: 320px;
+    --play-board-most: 560px;
+  }
+
+  .play-place-board svg.board,
+  .play-battle svg.board {
+    max-width: var(--play-board);
+    margin-inline: auto;
+  }
+}
+
+@media (min-width: 761px) {
+  .play-place,
+  .play-battle {
+    grid-template-columns: var(--play-board) minmax(0, var(--play-side));
+    justify-content: center;
+    gap: var(--play-gap);
+  }
+
+  .play-place {
+    grid-template-areas: "board fleet" "board start";
+    grid-template-rows: auto 1fr;
+  }
+
+  .play:not([data-stage="review"]) > .head,
+  .play-turn,
+  .play[data-stage="battle"] > .alert {
+    max-width: var(--play-width);
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 620px) {
+  .play {
+    --tray-cell: 13px;
+  }
+
+  .play-tray {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .play-tray button {
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .play-tray-name {
+    display: none;
+  }
+
+  .play-tray-count {
+    margin-left: auto;
+    min-width: 0;
+  }
+
+  .play-place-board .pad,
+  .play-battle .pad {
+    padding: 8px;
+  }
+
+  .play-result-ship,
+  .play-result-wreck {
+    width: 110px;
+  }
+
+  .play-result-stats {
+    grid-template-columns: repeat(3, 1fr);
+    width: 100%;
+  }
+
+  .play-result-again {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .play-result-again .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

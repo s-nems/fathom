@@ -1,0 +1,232 @@
+/* Everything drawn in the units of a board: ten to a cell. `.bd` is shared by boards and the keys under them. */
+svg.board {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.bd text {
+  font: 500 3.2px var(--mono);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.bd .coord {
+  font: italic 500 3.4px var(--sans);
+  fill: var(--text);
+}
+
+.bd .sound {
+  font: italic 400 2.5px var(--sans);
+  fill: var(--sounding);
+}
+
+.bd .ink-light {
+  fill: var(--text);
+}
+
+.bd .ink-dark {
+  fill: var(--on-player);
+}
+
+.bd .water {
+  fill: var(--water);
+  stroke: var(--grid);
+  stroke-width: 0.5;
+}
+
+.bd .map {
+  opacity: var(--map-strength);
+}
+
+.bd .gridline {
+  stroke: var(--grid);
+  stroke-width: 0.3;
+}
+
+.bd .contour {
+  fill: none;
+  stroke: var(--contour);
+  stroke-width: 0.35;
+}
+
+/* The neat line of a chart: a second frame with a tick at every cell. */
+.bd .neat {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 0.28;
+  opacity: 0.55;
+}
+
+.board-heat .gridline {
+  stroke: var(--surface);
+  stroke-width: 0.5;
+}
+
+.board-heat .water {
+  stroke: var(--line-strong);
+}
+
+/* Whole cells of a board too small for marks. */
+.bd .fill-miss {
+  fill: var(--miss);
+}
+
+.bd .fill-hit {
+  fill: var(--hit);
+}
+
+/* Plain hulls, for small boards and keys. */
+.bd .hull {
+  fill: var(--ship);
+  stroke: var(--ship-line);
+  stroke-width: 0.5;
+}
+
+.bd .ship-sunk .hull {
+  fill: var(--sunk-fill);
+  stroke: var(--hit);
+  stroke-width: 0.6;
+}
+
+.bd .ship-ghost .hull {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+  stroke-width: 0.6;
+  stroke-dasharray: 1.6 1.2;
+}
+
+.bd .ship-illegal .hull {
+  fill: color-mix(in srgb, var(--hit) 18%, transparent);
+  stroke: var(--hit);
+  stroke-width: 0.6;
+  stroke-dasharray: 1.6 1.2;
+}
+
+/* Engraved deck plans on a faint plate that shows the cells covered. */
+.bd .plate {
+  fill: color-mix(in srgb, var(--ship-line) 12%, transparent);
+  stroke: color-mix(in srgb, var(--ship-line) 55%, transparent);
+  stroke-width: 0.3;
+}
+
+.bd .vessel image {
+  filter: brightness(var(--ship-art-brightness));
+}
+
+.bd .ship-sunk .plate {
+  fill: var(--sunk-fill);
+  stroke: var(--hit);
+  stroke-width: 0.6;
+}
+
+.bd .ship-sunk image {
+  opacity: 0.38;
+  filter: grayscale(1) brightness(var(--ship-art-brightness));
+}
+
+.bd .ship-ghost .plate {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+  stroke-width: 0.6;
+  stroke-dasharray: 1.6 1.2;
+}
+
+.bd .ship-ghost image {
+  opacity: 0.55;
+}
+
+.bd .ship-illegal .plate {
+  fill: color-mix(in srgb, var(--hit) 18%, transparent);
+  stroke: var(--hit);
+  stroke-width: 0.6;
+  stroke-dasharray: 1.6 1.2;
+}
+
+.bd .ship-illegal image {
+  opacity: 0.3;
+}
+
+.bd .miss {
+  fill: none;
+  stroke: var(--miss);
+  stroke-width: 0.6;
+}
+
+.bd .hit {
+  fill: none;
+  stroke: var(--hit);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.bd .hit-halo {
+  fill: none;
+  stroke: var(--surface);
+  stroke-width: 2.9;
+  stroke-linecap: round;
+  opacity: 0.9;
+}
+
+.bd .ring-halo {
+  fill: none;
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.bd .ring-latest {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 0.9;
+}
+
+.bd .ring-chosen {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 0.9;
+  stroke-dasharray: 2 1.3;
+}
+
+.bd .target {
+  fill: transparent;
+  outline: none;
+}
+
+.bd .target-button {
+  cursor: crosshair;
+}
+
+.bd .target-button:hover,
+.bd .target:focus-visible {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+  stroke-width: 0.6;
+}
+
+.bd .target-button[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+.bd .target-button[aria-disabled="true"]:hover {
+  fill: transparent;
+  stroke: none;
+}
+
+/* How many ships of a fleet are left, as small bars in the lengths of the ships. */
+.pips {
+  flex: none;
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.pips i {
+  height: 7px;
+  border-radius: 2px;
+  background: var(--ship-line);
+}
+
+.pips i.gone {
+  background: var(--hit);
+  opacity: var(--dimmed);
+}

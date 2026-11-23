@@ -1,0 +1,564 @@
+/* Arena: one centred column. Setup on top, then the runs kept, then the run on screen. */
+.arena-view {
+  --arena-width: 1120px;
+  --inspector-width: 340px;
+  max-width: var(--arena-width);
+  margin-inline: auto;
+}
+
+/* Setup: every option says what it is. */
+.arena-setup {
+  margin-bottom: 16px;
+}
+
+.arena-presets {
+  display: flex;
+  align-items: center;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.arena-picker {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 20px 36px;
+  align-items: start;
+}
+
+.arena-picker-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+  font: 700 15px var(--sans);
+}
+
+.arena-picker-title small {
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.arena-picker-title .num {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.arena-group {
+  margin: 16px 0 6px;
+}
+
+.arena-opt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 50px;
+  padding: 4px 10px 4px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text);
+  text-align: left;
+}
+
+.arena-opt:hover {
+  background: var(--raised);
+}
+
+.arena-opt[aria-pressed="true"] {
+  background: var(--accent-soft);
+}
+
+.arena-tick {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 3px;
+  display: grid;
+  place-items: center;
+  font: 700 12px/1 var(--mono);
+  color: var(--accent-ink);
+}
+
+.arena-opt[aria-pressed="true"] .arena-tick {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.arena-opt[aria-pressed="true"] .arena-tick::after {
+  content: "\2713";
+}
+
+/* A board of 40px: ships are solid, as an outline that thin would not show. */
+.arena-thumb {
+  flex: none;
+  display: block;
+  width: 40px;
+  border: 1px solid var(--grid);
+}
+
+.arena-thumb .hull {
+  fill: var(--ship-line);
+  stroke: none;
+}
+
+.arena-opt[aria-pressed="false"] .arena-thumb {
+  opacity: var(--dimmed);
+}
+
+.arena-opt-text {
+  min-width: 0;
+}
+
+.arena-opt-text b {
+  display: block;
+  font: 500 14px var(--mono);
+}
+
+.arena-opt-text small {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+/* The cost of the run and its start stay in sight while the lists scroll. */
+.arena-estimate {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px 16px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  margin-bottom: -14px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: 0 -10px 12px -10px var(--bg);
+}
+
+.arena-estimate-end {
+  margin-left: auto;
+  gap: 8px 14px;
+  flex-wrap: wrap;
+}
+
+.arena-setup-note {
+  margin-top: 26px;
+}
+
+.arena-setup-note + .arena-setup-note {
+  margin-top: 12px;
+}
+
+/* The runs kept in this browser. */
+.arena-runbar {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  overflow-x: auto;
+  margin-bottom: 16px;
+  padding: 2px;
+}
+
+.arena-chip {
+  flex: none;
+  min-width: 168px;
+  padding: 7px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+}
+
+.arena-chip:hover {
+  background: var(--raised);
+}
+
+.arena-chip[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+  background: var(--raised);
+}
+
+.arena-chip b {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-weight: 600;
+}
+
+.arena-chip-meta {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.arena-kept {
+  flex: none;
+  display: flex;
+  align-items: center;
+  padding-left: 6px;
+}
+
+.arena-failed {
+  margin-bottom: 16px;
+}
+
+/* The run on screen, with the pairing looked into beside it. */
+.arena-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--inspector-width);
+  gap: 16px;
+  align-items: start;
+}
+
+.arena-grid-solo {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.arena-grid > * {
+  grid-column: 1;
+}
+
+.arena-grid > .arena-inspector {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+.arena-progress {
+  height: 3px;
+  background: var(--raised);
+  overflow: hidden;
+}
+
+.arena-progress i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s linear;
+}
+
+.arena-verdict {
+  padding: 14px 16px 2px;
+  font-size: 16px;
+  text-wrap: pretty;
+}
+
+.arena-verdict b {
+  font-family: var(--mono);
+  font-weight: 500;
+}
+
+.arena-scroll {
+  overflow-x: auto;
+}
+
+.arena-matrix {
+  border-collapse: separate;
+  border-spacing: 4px;
+  width: 100%;
+  padding: 8px 12px 4px;
+}
+
+.arena-matrix th {
+  font-weight: 500;
+  color: var(--muted);
+  text-align: center;
+  padding: 4px 8px;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.arena-matrix thead th.arena-axis {
+  text-align: left;
+  padding-bottom: 0;
+}
+
+.arena-matrix thead th.arena-col {
+  font-family: var(--mono);
+  color: var(--text);
+}
+
+.arena-matrix th.arena-row {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface);
+  text-align: left;
+  color: var(--text);
+  font-family: var(--mono);
+  padding-left: 0;
+}
+
+.arena-matrix th.arena-row i {
+  display: inline-block;
+  width: 22px;
+  color: var(--faint);
+  font-style: normal;
+}
+
+.arena-matrix td {
+  padding: 0;
+}
+
+.arena-cell {
+  width: 100%;
+  min-width: 88px;
+  height: 44px;
+  border: 0;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 1px;
+  color: var(--text);
+}
+
+.arena-cell-done {
+  background: color-mix(in oklab, var(--tint) var(--share, 0%), var(--raised));
+}
+
+.arena-cell b {
+  font: 500 16px var(--mono);
+}
+
+.arena-cell-best b {
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.arena-cell small {
+  font: 11px var(--mono);
+  color: var(--muted);
+}
+
+button.arena-cell:hover {
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+}
+
+.arena-cell[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.arena-cell-pending {
+  background: repeating-linear-gradient(135deg, var(--raised) 0 6px, transparent 6px 12px);
+  border: 1px dashed var(--line-strong);
+}
+
+.arena-cell-running {
+  border-color: var(--accent);
+}
+
+.arena-cell-running small {
+  color: var(--accent);
+}
+
+.arena-cell-none {
+  border: 1px dashed var(--line);
+}
+
+.arena-cell-none small {
+  color: var(--faint);
+}
+
+.arena-matrix td.arena-avg {
+  font: 500 14px var(--mono);
+  text-align: right;
+  padding: 0 4px 0 10px;
+  white-space: nowrap;
+}
+
+.arena-avg small {
+  display: block;
+  font: 11px var(--mono);
+  color: var(--muted);
+}
+
+.arena-ramp {
+  background: linear-gradient(90deg, color-mix(in oklab, var(--tint) 55%, var(--raised)), var(--raised));
+}
+
+/* One pairing. */
+.arena-who {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 18px;
+}
+
+.arena-who dt {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.arena-who dt b {
+  font: 500 14px var(--mono);
+}
+
+.arena-who dd {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.arena-mean {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.arena-mean-end {
+  margin-left: auto;
+}
+
+.arena-big {
+  font: 500 40px/1 var(--mono);
+  letter-spacing: -0.02em;
+}
+
+.arena-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 14px 0 16px;
+}
+
+.arena-stats b {
+  display: block;
+  font: 500 16px var(--mono);
+  margin-top: 5px;
+}
+
+.arena-hist {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  height: 92px;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.arena-hist i {
+  flex: 1;
+  background: var(--accent);
+  border-radius: 1px 1px 0 0;
+  opacity: 0.8;
+  min-height: 1px;
+}
+
+.arena-hist u {
+  position: absolute;
+  top: -4px;
+  bottom: 0;
+  width: 0;
+  border-left: 1.5px dashed var(--text);
+}
+
+.arena-hist-axis {
+  display: flex;
+  justify-content: space-between;
+  color: var(--faint);
+  font: 11px var(--mono);
+  margin-top: 4px;
+}
+
+.arena-inspector .arena-watch {
+  margin-top: 14px;
+}
+
+/* Head to head. */
+.arena-h2h {
+  display: grid;
+  gap: 10px;
+}
+
+.arena-h2h-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.arena-h2h-row select {
+  flex: 1;
+  min-width: 0;
+}
+
+.arena-share {
+  display: flex;
+  height: 34px;
+  border-radius: 8px;
+  overflow: hidden;
+  font: 600 14px var(--mono);
+  gap: 2px;
+}
+
+.arena-share span {
+  display: flex;
+  align-items: center;
+  min-width: max-content;
+  padding: 0 10px;
+  color: var(--on-player);
+}
+
+.arena-share-one {
+  background: var(--one);
+}
+
+.arena-share-two {
+  background: var(--two);
+  justify-content: flex-end;
+  flex: 1;
+}
+
+.arena-h2h .arena-watch {
+  justify-self: start;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arena-progress i {
+    transition: none;
+  }
+}
+
+@media (max-width: 1180px) {
+  .arena-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .arena-grid > .arena-inspector {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 980px) {
+  .arena-picker {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 620px) {
+  .arena-cell {
+    min-width: 72px;
+  }
+
+  .arena-estimate-end {
+    margin-left: 0;
+    flex: 1 1 100%;
+    justify-content: space-between;
+  }
+}

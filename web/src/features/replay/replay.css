@@ -1,0 +1,419 @@
+/* A game shot by shot: the boards with the timeline, and the list of shots beside them. */
+.replay {
+  /* Both boards and everything under them fit the window, so the side of a board follows its height. */
+  --replay-board: clamp(300px, calc(100vh - 530px), 540px);
+  --shot-panel-head: 48px;
+  --shot-panel-min: 320px;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 16px;
+}
+
+.replay-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.replay-status-shot {
+  font: 500 14px var(--mono);
+  color: var(--muted);
+}
+
+.replay-status b {
+  font: 600 15px var(--mono);
+}
+
+.replay-boards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, var(--replay-board)));
+  justify-content: space-evenly;
+  gap: 20px;
+  padding: 12px 16px 10px;
+}
+
+.replay-side-board {
+  min-width: 0;
+}
+
+.replay-player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.replay-player-who {
+  font: 700 11px var(--sans);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.replay-player-name {
+  font: 500 14px var(--mono);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.replay-player .pips {
+  margin-left: auto;
+}
+
+.replay-caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 8px;
+  white-space: nowrap;
+}
+
+.replay-caption span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.replay-boards-key {
+  padding: 0 16px 12px;
+  justify-content: center;
+}
+
+.replay-note {
+  padding: 0 16px 12px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* On a phone one board is on screen, and this switch says which. */
+.replay-board-switch {
+  display: none;
+  margin: 12px 16px 0;
+}
+
+.replay-transport {
+  border-top: 1px solid var(--line);
+  padding: 12px 16px 14px;
+}
+
+.replay-chart-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 6px;
+}
+
+.replay-chart-head .end {
+  margin-left: auto;
+}
+
+.replay-legend-line {
+  flex: none;
+  display: inline-block;
+  width: 10px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.replay-afloat {
+  display: block;
+  width: 100%;
+  height: 64px;
+}
+
+.replay-afloat-future {
+  fill: var(--surface);
+  opacity: 0.6;
+}
+
+.replay-scrubber {
+  display: block;
+  width: 100%;
+  margin: 4px 0 0;
+}
+
+.replay-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.replay-controls-position {
+  margin-left: 6px;
+}
+
+.replay-controls-end {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.replay-speed {
+  height: 30px;
+}
+
+/* The list takes the height of the boards beside it and scrolls inside. */
+.replay-shot-panel {
+  position: relative;
+  min-height: var(--shot-panel-min);
+}
+
+.replay-shot-panel > .panel-head {
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--shot-panel-head);
+}
+
+.replay-shot-list {
+  position: absolute;
+  inset: var(--shot-panel-head) 0 0;
+  overflow-y: auto;
+}
+
+.replay-shot-list ol {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+}
+
+.replay-shot-list li > button {
+  display: grid;
+  grid-template-columns: 30px 10px 36px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font: 13px var(--mono);
+  text-align: left;
+}
+
+.replay-shot-list li > button:hover {
+  background: var(--raised);
+}
+
+.replay-shot-list li.replay-now > button {
+  background: var(--accent-soft);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+/* Shots not reached yet are quieter, and still readable. Their results keep their colour. */
+.replay-shot-list li.replay-later > button {
+  color: var(--muted);
+}
+
+.replay-shot-list b {
+  font-weight: 500;
+}
+
+.replay-shot-number {
+  color: var(--faint);
+  text-align: right;
+}
+
+.replay-shot-time {
+  color: var(--faint);
+  font-size: 12px;
+}
+
+/* The replay view. Without a game it is one centred column: two ways to get a game on screen. */
+.replay-empty > .head,
+.replay-start {
+  max-width: 1080px;
+  margin-inline: auto;
+}
+
+.replay-start {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.replay-summary {
+  flex: 1 1 260px;
+  display: flex;
+  align-items: center;
+  gap: 6px 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+  font: 13px var(--mono);
+}
+
+.replay-summary p {
+  font-family: var(--sans);
+  color: var(--muted);
+}
+
+.replay-versus {
+  color: var(--faint);
+  font: 700 11px var(--sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.replay-sides {
+  display: grid;
+  gap: 8px;
+}
+
+.replay-side {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-height: 38px;
+  padding: 4px 6px 4px 10px;
+  border-radius: var(--radius-control);
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+}
+
+.replay-side-who {
+  width: 30px;
+  font: 700 11px var(--sans);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.replay-side-choice {
+  flex: 1 1 0;
+  width: 0;
+  min-width: 84px;
+  height: 28px;
+  border: 0;
+  background: none;
+  padding: 0 2px;
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.replay-options {
+  display: flex;
+  align-items: center;
+  gap: 10px 16px;
+  flex-wrap: wrap;
+  margin: 14px 0 16px;
+}
+
+.replay-drop {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  text-align: center;
+  gap: 10px;
+  min-height: 178px;
+  padding: 20px 16px;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: var(--radius);
+  color: var(--muted);
+}
+
+.replay-drop b {
+  color: var(--text);
+  font-size: 15px;
+}
+
+.replay-drop .art {
+  width: 150px;
+}
+
+.replay-drop + .alert,
+.replay-view > .alert {
+  margin-top: 12px;
+}
+
+.replay-view > .alert {
+  margin-bottom: 16px;
+}
+
+/* Shown over the page while a file is dragged over it. */
+.replay-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  pointer-events: none;
+}
+
+.replay-veil-frame {
+  width: 100%;
+  height: 100%;
+  max-width: 900px;
+  max-height: 520px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  text-align: center;
+  border: 2px dashed var(--accent);
+  border-radius: 16px;
+  background: var(--accent-soft);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.replay-veil small {
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@media (max-width: 1180px) {
+  .replay {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .replay-shot-panel {
+    height: var(--shot-panel-min);
+  }
+}
+
+@media (max-width: 980px) {
+  .replay-start {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 620px) {
+  .replay-boards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .replay-board-switch {
+    display: inline-flex;
+  }
+
+  .replay-boards[data-shown="ONE"] > :nth-child(2),
+  .replay-boards[data-shown="TWO"] > :nth-child(1) {
+    display: none;
+  }
+
+  .replay-caption {
+    white-space: normal;
+  }
+
+  .replay-drop .art {
+    width: 104px;
+  }
+
+  .replay-veil-frame {
+    font-size: 16px;
+  }
+}

@@ -1,0 +1,73 @@
+/* One look, the night chart. Every colour is a token here, and there is no light theme. */
+:root {
+  color-scheme: dark;
+
+  --sans: "Alegreya Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --display-weight: 800;
+  --display-track: -0.01em;
+
+  /* Three surface levels that stay apart: the ground, panels on it, controls on panels. */
+  --bg: #0b141f;
+  --surface: #14202e;
+  --raised: #1d2b3b;
+  --hover: #29394b;
+  --line: #2a3a4b;
+  --line-strong: #475c73;
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+
+  --text: #eef3f8;
+  --muted: #b0bfce;
+  --faint: #7e93a8;
+
+  /* Magenta, the colour a chart prints its notes in, marks what the reader acts on. */
+  --accent: #f47dba;
+  --accent-ink: #2a0518;
+  --accent-soft: rgba(244, 125, 186, 0.15);
+
+  --one: #72baff;
+  --two: #f0c05a;
+  --on-player: #0b1420;
+  --warn: #f0c05a;
+
+  /* Boards carry the colour of the page: water lighter than the panels, chalk-pale ink for ships. */
+  --water: #1a3d60;
+  --grid: #335a7e;
+  --contour: #28507a;
+  --sounding: #5f8db6;
+  --ship: #2a4d70;
+  --ship-line: #f1f5f9;
+  --miss: #b3c5d5;
+  --hit: #ff6f5c;
+  --sunk-fill: #55262b;
+  --map-strength: 0.72;
+  --ship-art-brightness: 0.9;
+
+  /* Arena cells are tinted with this, the middle of the heat ramp in `ui/board/heatColour.ts`. */
+  --tint: #4a9fd4;
+
+  /* The ground of every view, see base.css. One line each to make it fainter or darker. */
+  --ground-clear-until: 30%;
+  --ground-edge-shade: rgba(5, 9, 14, 0.55);
+
+  /* What is switched off or waiting for a newer answer. Never on text that has to be read. */
+  --dimmed: 0.45;
+
+  --radius: 4px;
+  --radius-control: 8px;
+  --gutter: 20px;
+  --page-width: 1400px;
+}
+
+/*
+ * Breakpoints, the same in every stylesheet, as a media query cannot read a custom property:
+ *   620px  and narrower: a phone, one column, the smaller gutter.
+ *   760px  and narrower: a narrow window, play and distributions go from two columns to one.
+ *   980px  and narrower: a tablet, views with two columns stack them.
+ *   1180px and narrower: a small laptop, the widest views drop their side column.
+ */
+@media (max-width: 620px) {
+  :root {
+    --gutter: 16px;
+  }
+}
