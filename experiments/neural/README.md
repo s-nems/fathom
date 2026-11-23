@@ -62,8 +62,7 @@ uv run python -m fathom_neural.evaluate shots --shooter runs/answer/shooter.pt -
 ## Results
 
 10,000 fleets per layout, the same for every shooter. The 95% intervals are between 0.06 and 0.08 shots. The
-scripted shooters come from `./gradlew arena --args="shots <file>"`. The outputs are in `measurements` in the
-root of the repository.
+scripted shooters come from `./gradlew arena --args="shots <file>"`. The outputs are in `docs/measurements`.
 
 | Shooter | Fleets placed ship by ship at random | The bot's layout | The trained placer's layout |
 |---|---|---|---|

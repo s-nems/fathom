@@ -31,7 +31,7 @@ Run the formatter and the build as two invocations.
 | `engine` | Module that compiles the sources of the three above, and its own, for the JVM and for WebAssembly, with its own README. The files it leaves out are listed in its build script |
 | `web` | The studio: a page in React that calls the engine in the browser. Not part of the Gradle build |
 | `experiments/neural` | A neural shooter and placer in Python, with its own README. Not part of the build |
-| `measurements` | Outputs of the arena behind the numbers in the README |
+| `docs/measurements` | Outputs of the arena behind the numbers in the README |
 
 ## Rules of the code
 

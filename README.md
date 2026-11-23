@@ -14,7 +14,7 @@ Play against the bot, replay games and run the arena in the browser at
 | `arena` | Other shooters and layouts to measure the bot against |
 | `engine` | The same game compiled to WebAssembly, with what the studio page shows |
 | `web` | A page to run the arena, replay games and play against the bot. It runs the engine in the browser and needs no server |
-| `measurements` | Outputs of the arena behind the numbers below, and the tuning |
+| `docs/measurements` | Outputs of the arena behind the numbers below, and the tuning |
 | `experiments/neural` | A neural shooter and placer in Python, outside the build |
 
 `bot`, `app`, `arena` and `engine` are Gradle modules. `app` uses `bot`, `arena` uses both, and `engine`
@@ -95,7 +95,7 @@ a shooter, higher for a layout. The name in the output is in brackets.
   The layout is a bet that the opponent has not studied this bot.
 - A network shooter and placer trained against each other, without the bot, win 56% of games against it.
 
-The settings tried and why each value was kept are in `measurements/README.md`, the networks in
+The settings tried and why each value was kept are in `docs/measurements/README.md`, the networks in
 `experiments/neural/README.md`.
 
 ## Assumptions
