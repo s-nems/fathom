@@ -57,6 +57,12 @@ class ShootingRange(
         private const val SHOOTER_STREAM = 1L
         private const val STREAMS = 2L
 
+        /**
+         * Games a run may have. Every game draws from a stream of its own, and past this number the streams
+         * of the fleets would run into those of the shooters.
+         */
+        const val MOST_GAMES = SEED_STRIDE
+
         fun fleetOf(ships: List<ShipPlacement>): Fleet = ships.fold(Fleet.EMPTY, Fleet::place)
 
         private fun randomFor(

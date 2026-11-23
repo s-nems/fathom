@@ -7,23 +7,45 @@ private const val DRAW_SHARE = 0.5
 /**
  * Mean of a sample with its 95% confidence interval.
  */
-class Estimate(
-    values: DoubleArray,
+class Estimate private constructor(
+    size: Long,
+    val mean: Double,
+    squaredDeviations: Double,
 ) {
+    constructor(values: DoubleArray) : this(values.size.toLong(), values.average(), squaredDeviations(values))
+
     init {
-        require(values.size > 1) { "An interval needs at least two values" }
+        require(size > 1) { "An interval needs at least two values" }
     }
 
-    val mean: Double = values.average()
-    val deviation: Double = sqrt(values.sumOf { (it - mean) * (it - mean) } / (values.size - 1))
+    val deviation: Double = sqrt(squaredDeviations / (size - 1))
 
     /**
      * Half the width of the 95% confidence interval of the mean.
      */
-    val margin: Double = NORMAL_95 * deviation / sqrt(values.size.toDouble())
+    val margin: Double = NORMAL_95 * deviation / sqrt(size.toDouble())
 
-    private companion object {
-        const val NORMAL_95 = 1.96
+    companion object {
+        private const val NORMAL_95 = 1.96
+
+        /**
+         * The estimate of a sample given as a histogram: [counts] holds, for each value from 0 up, how often
+         * the sample has it. The sample itself is never spelled out, so its size costs nothing.
+         *
+         * @throws IllegalArgumentException if a count is negative or the sample has fewer than two values
+         */
+        fun ofCounts(counts: List<Int>): Estimate {
+            require(counts.all { it >= 0 }) { "A histogram counts how often a value occurs" }
+            val size = counts.sumOf { it.toLong() }
+            val mean = counts.withIndex().sumOf { (value, count) -> value.toDouble() * count } / size
+            val squares = counts.withIndex().sumOf { (value, count) -> (value - mean) * (value - mean) * count }
+            return Estimate(size, mean, squares)
+        }
+
+        private fun squaredDeviations(values: DoubleArray): Double {
+            val mean = values.average()
+            return values.sumOf { (it - mean) * (it - mean) }
+        }
     }
 }
 
